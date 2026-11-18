@@ -1,0 +1,170 @@
+@import "./lib/motion/motion.css";
+
+:root {
+  --bg: #FAF9F5; --panel: #F0EEE6; --panel2: #E8E6DC; --text: #1F1E1D; --muted: #65645E; --line: #DEDBCD;
+  --accent: #D97757; --accent-strong: #B5502D; --accent-ink: #FFFFFF; --focus: #D97757;
+  --red: #C8423B; --red-text: #B0332C; --blue-text: #2F6FA3; --green-text: #3F7A4D;
+  --lv-calm: #5B9A68; --lv-easy: #9AAE4B; --lv-normal: #D8A532; --lv-busy: #E07B39; --lv-packed: #C8423B;
+  --fillmax: 34%; --shadow: 0 8px 30px rgba(31, 30, 29, .16);
+  --accent-soft: color-mix(in srgb, var(--accent) 16%, transparent); --accent-text: #A64826; --danger-strong: #B0332C;
+  --scrim: rgb(31 30 29 / .32); --shadow-ghost: 0 18px 38px -6px rgb(31 30 29 / .35), 0 6px 14px rgb(31 30 29 / .2);
+  --font: "Pretendard Variable", Pretendard, -apple-system, system-ui, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --mono: "Geist Mono", "Pretendard Variable", Pretendard, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --field: 15px;
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg: #262624; --panel: #30302E; --panel2: #3A3A37; --text: #F5F4EE; --muted: #A8A69C; --line: #4A4A45;
+  --accent: #D97757; --accent-strong: #B5502D; --red: #E0645C; --red-text: #FF8F86; --blue-text: #8DB8E6; --green-text: #8CC79A;
+  --lv-calm: #6FB07C; --lv-easy: #B0C45E; --lv-normal: #E3B54A; --lv-busy: #E88A4B; --lv-packed: #E0645C;
+  --fillmax: 26%; --shadow: 0 8px 30px rgba(0, 0, 0, .5); color-scheme: dark;
+  --accent-text: #E8956F; --danger-strong: #B8433B; --scrim: rgb(0 0 0 / .55);
+  --shadow-ghost: 0 18px 38px -6px rgb(0 0 0 / .6), 0 6px 14px rgb(0 0 0 / .4);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="auto"] {
+    --bg: #262624; --panel: #30302E; --panel2: #3A3A37; --text: #F5F4EE; --muted: #A8A69C; --line: #4A4A45;
+    --accent: #D97757; --accent-strong: #B5502D; --red: #E0645C; --red-text: #FF8F86; --blue-text: #8DB8E6; --green-text: #8CC79A;
+    --lv-calm: #6FB07C; --lv-easy: #B0C45E; --lv-normal: #E3B54A; --lv-busy: #E88A4B; --lv-packed: #E0645C;
+    --fillmax: 26%; --shadow: 0 8px 30px rgba(0, 0, 0, .5); color-scheme: dark;
+    --accent-text: #E8956F; --danger-strong: #B8433B; --scrim: rgb(0 0 0 / .55);
+    --shadow-ghost: 0 18px 38px -6px rgb(0 0 0 / .6), 0 6px 14px rgb(0 0 0 / .4);
+  }
+}
+* { box-sizing: border-box; }
+
+/* ==========================================================================
+ * 기반 토큰(테마와 무관한 것)
+ * ======================================================================== */
+:root {
+  /* 반전 표면: 토스트·툴팁. 어느 테마에서도 화면과 구분된다 */
+  --toast-bg: var(--text);
+  --toast-fg: var(--bg);
+  --radius: 8px;
+  --radius-lg: 12px;
+  --target: 36px; /* 터치 최소 타깃 */
+
+  /* 레이어 순서: 한 곳에서 정한다. 나중에 열리는 층이 위다.
+   * legacy 의 --z-scrim·--z-panel·--z-pop 은 --z-layer 하나로 합쳤다. 층마다 스택 순번이 더해진다(최대 40층). */
+  --z-sticky: 10;
+  --z-top: 20;
+  --z-layer: 100;
+  --z-drag: 200;
+  --z-flash: 250;
+  --z-toast: 300;
+  --z-tip: 350;
+}
+
+/* ==========================================================================
+ * 리셋
+ * ======================================================================== */
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 var(--font); }
+html, body { height: 100%; }
+#app { min-height: 100vh; min-height: 100dvh; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: default; }
+[hidden] { display: none !important; }
+h1, h2, h3, p { margin: 0; }
+.num { font-variant-numeric: tabular-nums; }
+/* 가운데 정렬 폭 상자. flex 열(.shell)의 직계 자식이면 margin:auto 때문에 폭이 내용 크기(shrink-to-fit)가 되어
+ * 내용이 넓은 탭 줄이 화면 폭을 넘는다 → width:100% 로 가용 폭을 채우고 max-width 로 제한, min-width:0 으로 안쪽 스크롤이 먹게 한다. */
+.wrap {
+  width: 100%; min-width: 0; max-width: 1180px; margin: 0 auto; padding: 0 16px;
+  padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right));
+}
+
+/* 좁은 폭의 탭 줄(Shell 의 .tabs): 네 탭이 가로 스크롤 없이 한 줄에 들어오게 안쪽 여백·아이콘을 줄인다.
+ * Shell 의 범위 규칙(.tab)보다 특이도를 높여 이긴다. */
+@media (max-width: 420px) {
+  .tabs-wrap .tabs .tab { padding-left: 8px; padding-right: 8px; gap: 4px; flex: 1 1 auto; justify-content: center; }
+}
+@media (max-width: 360px) {
+  .tabs-wrap .tabs .tab svg { display: none; }
+}
+
+/* 화면 밖 글자: 보조기술에만 읽힌다 */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ==========================================================================
+ * 포커스 링: 키보드(:focus-visible)에서만. button 만이 아니라 a·select·textarea·[tabindex] 에도 건다
+ * ======================================================================== */
+:focus-visible,
+a:focus-visible, button:focus-visible, select:focus-visible, textarea:focus-visible, input:focus-visible,
+summary:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--focus); outline-offset: 2px;
+}
+input:focus-visible, select:focus-visible, textarea:focus-visible { border-color: var(--focus); }
+
+/* ==========================================================================
+ * 단추
+ *  .primary(강조색 채움)는 화면당 하나만 쓴다. 그 화면의 주 동작에만 주고, 닫기·취소·보조 동작은
+ *  기본(.btn) 이나 투명(.btn.ghost) 으로 둔다. 눌림 상태·선택 상태를 강조 채움으로 표현하지 않는다.
+ *  .danger-fill 은 되돌릴 수 없는 동작의 확인 단계에서만 쓴다.
+ * ======================================================================== */
+.btn {
+  border: 1px solid var(--line); background: var(--panel); border-radius: var(--radius); padding: 6px 12px; min-height: 34px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; text-decoration: none;
+}
+.btn:hover:not(:disabled) { background: var(--panel2); }
+.btn svg { width: 16px; height: 16px; flex: none; }
+.btn.primary { background: var(--accent-strong); color: var(--accent-ink); border-color: var(--accent-strong); font-weight: 600; }
+.btn.primary:hover:not(:disabled) { background: color-mix(in srgb, var(--accent-strong) 88%, black); border-color: transparent; }
+.btn.ghost { background: transparent; border-color: transparent; }
+.btn.ghost:hover:not(:disabled) { background: var(--panel2); }
+.btn.danger { color: var(--red-text); border-color: var(--red-text); background: transparent; }
+.btn.danger:hover:not(:disabled) { background: color-mix(in srgb, var(--red-text) 12%, transparent); }
+.btn.danger-fill { background: var(--danger-strong); color: var(--accent-ink); border-color: var(--danger-strong); font-weight: 600; }
+.btn.danger-fill:hover:not(:disabled) { background: color-mix(in srgb, var(--danger-strong) 88%, black); border-color: transparent; }
+.btn:disabled, .btn[aria-disabled="true"] { opacity: .45; }
+
+.icon-btn {
+  width: 32px; height: 32px; min-width: 32px; display: inline-grid; place-items: center; padding: 0;
+  border: 1px solid transparent; background: transparent; border-radius: var(--radius);
+}
+.icon-btn:hover:not(:disabled) { background: var(--panel2); }
+.icon-btn[aria-pressed="true"], .icon-btn[aria-expanded="true"] { background: var(--panel2); border-color: var(--line); }
+.icon-btn:disabled { opacity: .45; }
+.icon-btn svg { width: 18px; height: 18px; }
+
+/* ==========================================================================
+ * 입력
+ * ======================================================================== */
+input[type="text"], input[type="date"], input[type="number"], input[type="url"], input[type="search"], select, textarea {
+  border: 1px solid var(--line); background: var(--bg); border-radius: var(--radius); padding: 6px 10px; min-height: 34px;
+  width: 100%; font-size: var(--field);
+}
+textarea { resize: vertical; min-height: 72px; }
+input[type="number"] { width: 72px; text-align: center; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+input::placeholder, textarea::placeholder { color: var(--muted); }
+label.f { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+.muted { color: var(--muted); }
+
+/* ==========================================================================
+ * 툴팁(use:tip 이 만드는 요소)
+ * ======================================================================== */
+.ui-tip {
+  position: fixed; left: 0; top: 0; z-index: var(--z-tip); pointer-events: none; max-width: min(260px, calc(100vw - 16px));
+  padding: 4px 8px; border-radius: 6px; background: var(--toast-bg); color: var(--toast-fg);
+  font-size: 12px; line-height: 1.4; box-shadow: var(--shadow); overflow-wrap: anywhere;
+}
+.ui-tip kbd {
+  font: inherit; font-family: var(--mono); font-size: 11px; margin-left: 6px; padding: 0 4px; border-radius: 4px;
+  border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
+}
+
+/* ==========================================================================
+ * 터치: 입력창 글자 16px 이상(iOS 확대 방지), 누르는 영역 36px 이상
+ * ======================================================================== */
+@media (pointer: coarse) {
+  input[type="text"], input[type="date"], input[type="number"], input[type="url"], input[type="search"], select, textarea {
+    font-size: 16px; min-height: var(--target);
+  }
+  .btn { min-height: var(--target); }
+  .icon-btn { width: var(--target); height: var(--target); min-width: var(--target); }
+  input[type="checkbox"], input[type="radio"] { width: 20px; height: 20px; }
+}

@@ -1,0 +1,38 @@
+// 달력 화면의 새 문구. 기존 문구는 src/lib/app/strings.ts 의 S 를 그대로 쓴다.
+export const PT = {
+  weekHead: ['월', '화', '수', '목', '금', '토', '일'] as const,
+  noExam: '시험이 없습니다. 위쪽의 새 시험 단추로 시험을 만들면 준비 기간이 달력으로 나타납니다.',
+  noPrep: '준비 기간이 없습니다. 시험 일정에서 준비 시작일과 시험 종료일을 확인해 주세요.',
+  scrollLabel: '달력 표, 가로 스크롤 영역',
+  scrollHint: '표가 화면보다 넓습니다. 가로로 밀어 전체를 볼 수 있습니다.',
+  done: '(완료)',
+  todo: '(미완료)',
+  saved: '달력 HTML 을 저장했습니다',
+  saveFail: (reason: string) => '달력 HTML 을 저장하지 못했습니다: ' + reason,
+  printFail: (reason: string) => '인쇄 창을 열지 못했습니다: ' + reason,
+  reasonNoCalendar: '저장할 달력이 없습니다',
+  reasonNoFileApi: '이 브라우저는 파일 저장을 지원하지 않습니다',
+  reasonDownload: '브라우저가 파일 내려받기를 완료하지 못했습니다',
+  reasonPrint: '브라우저가 인쇄를 시작하지 못했습니다',
+  daySummary: (date: string, level: string, count: number, done: number) => date + ', 바쁨 정도 ' + level + ', 할일 ' + count + '개, 완료 ' + done + '개',
+  fullDate: (m: number, d: number, wd: string) => m + '월 ' + d + '일 ' + wd + '요일',
+  monthDay: (m: number, d: number) => m + '월 ' + d + '일',
+  titleRange: (a: string, b: string) => a + ' – ' + b,
+  range: (a: string, b: string) => a + ' ~ ' + b,
+  pageNo: (i: number, total: number) => i + ' / ' + total,
+  weekSumTitle: '주간 요약',
+  weekDone: (n: number) => '완료 ' + n,
+  weekLeft: (n: number) => '남음 ' + n,
+  weekSummary: (title: string, sum: number, done: number, left: number) => title + ' 주간 요약, 할일 ' + sum + '개, 완료 ' + done + '개, 남음 ' + left + '개',
+  /* 카드에서 줄인 할일 수를 나타내는 줄. {n} 자리에 개수가 들어간다 */
+  more: (n: number | string) => '외 ' + n + '개',
+  reduced: (n: number) => '일부 카드는 할일이 많아 ' + n + '개를 "외 ' + n + '개"로 줄였습니다',
+  /* 분할한 쪽의 머리 표기: 2주 단위를 주별로 나눈 쪽은 '(2주 중 1주차)', 1주 단위를 요일 카드로 나눈 쪽은 '(1/2)' */
+  partWeek: (n: number) => '(2주 중 ' + n + '주차)',
+  partWeekHalf: (n: number, h: number) => '(2주 중 ' + n + '주차 ' + h + '/2)',
+  partHalf: (n: number) => '(' + n + '/2)',
+  /* 화면 안내: 분할한 단위를 보기 형식에 맞게 구체적으로 적는다. unit 은 1부터 센 단위 번호, pages 는 그 단위의 쪽 수 */
+  splitUnit: (perPage: number, unit: number, pages: number) => (perPage === 1 ? '1주 보기 ' + unit + '주차' : '2주 보기 ' + unit + '쪽째') + '는 ' + pages + '쪽',
+  split: (n: number, units: string) => '할일이 많아 ' + n + '개 단위를 나눴습니다(' + units + ')',
+  dDay: (dd: number) => (dd > 0 ? 'D-' + dd : dd === 0 ? 'D-DAY' : ''),
+} as const;

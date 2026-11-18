@@ -1,0 +1,171 @@
+/* 준비 계획 화면(달력·날짜 상세·보관함·일괄 작업 막대·리캡 패널). 클래스는 모두 pl- 로 시작한다.
+ * 색·그림자·길이·이징은 src/app.css 와 motion.css 의 토큰만 쓴다. 기준 폭은 900px 하나(달력 안의 점 요약만 달력 폭 기준). */
+
+/* flex 열: 일괄 작업 막대(position: sticky)가 화면 하단에 붙으려면 grid 가 아니라 flex/block 의 자식이어야 한다 */
+.pl-root { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.pl-root:focus { outline: none; }
+.pl-grow { flex: 1; }
+.pl-small { font-size: 12px; }
+.pl-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 12px; min-width: 0; }
+
+.pl-empty { max-width: 640px; margin: 0 auto; width: 100%; text-align: center; padding: 24px 8px; display: grid; gap: 8px; justify-items: center; }
+.pl-empty h2 { font-size: 18px; }
+
+/* 지연 배너 */
+.pl-banner {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border: 1px solid var(--red-text); border-radius: var(--radius-lg);
+  padding: 8px 12px; background: color-mix(in srgb, var(--red) 12%, var(--bg));
+}
+
+/* 상단 도구줄 */
+.pl-toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; min-width: 0; }
+.pl-badge {
+  min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; display: inline-grid; place-items: center;
+  background: var(--panel2); border: 1px solid var(--line); font-family: var(--mono); font-size: 12px;
+}
+.pl-recaprow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.pl-recap > .pl-small { margin-top: 6px; }
+
+/* 본문: 넓으면 달력 + 우측 상세 고정, 좁으면 한 열 */
+.pl-board { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; align-items: start; min-width: 0; }
+.pl-side {
+  position: sticky; top: 68px; max-height: calc(100vh - 84px); max-height: calc(100dvh - 84px); overflow: auto;
+  display: grid; gap: 12px; align-content: start; min-width: 0;
+}
+@media (max-width: 900px) {
+  .pl-board { grid-template-columns: minmax(0, 1fr); }
+  .pl-side { position: static; max-height: none; overflow: visible; }
+}
+
+/* 달력 격자 */
+.pl-calwrap { container-type: inline-size; container-name: plcal; min-width: 0; }
+.pl-grid { display: grid; gap: 6px; min-width: 0; }
+.pl-row { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; min-width: 0; }
+.pl-wh { text-align: center; font-size: 12px; font-weight: 600; color: var(--muted); padding: 4px 0; }
+.pl-wh[data-w="0"] { color: var(--red-text); }
+.pl-wh[data-w="6"] { color: var(--blue-text); }
+
+.pl-cell {
+  --lv: var(--lv-normal); position: relative; min-height: 108px; padding: 6px; display: flex; flex-direction: column; gap: 4px; min-width: 0;
+  border: 1px solid var(--line); border-radius: 8px; cursor: pointer;
+  background: color-mix(in srgb, var(--lv) calc(var(--fill, 0) * var(--fillmax)), var(--bg));
+  scroll-margin: 84px 0 96px; user-select: none; -webkit-user-select: none;
+}
+.pl-cell[data-level="calm"] { --lv: var(--lv-calm); }
+.pl-cell[data-level="easy"] { --lv: var(--lv-easy); }
+.pl-cell[data-level="normal"] { --lv: var(--lv-normal); }
+.pl-cell[data-level="busy"] { --lv: var(--lv-busy); }
+.pl-cell[data-level="packed"] { --lv: var(--lv-packed); }
+.pl-cell[data-over] { --lv: var(--red); border-color: var(--red-text); }
+.pl-cell[data-past] { opacity: 0.8; }
+.pl-cell[data-today] { outline: 2px solid var(--focus); outline-offset: 1px; }
+/* 열린 칸(상세로 보는 날)과 고른 칸은 서로 구분된다: 열린 칸 = 진한 테두리, 고른 칸 = 강조 안쪽 윤곽 + 강조 면 */
+.pl-cell[data-cur] { border-color: var(--text); }
+@media (hover: hover) { .pl-cell:not(.pad):not([data-cur]):hover { border-color: var(--muted); } }
+.pl-cell[data-sel] { box-shadow: inset 0 0 0 2px var(--accent-strong); background-image: linear-gradient(var(--accent-soft), var(--accent-soft)); }
+.pl-grid .pl-cell:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
+.pl-cell.pad {
+  background: repeating-linear-gradient(45deg, transparent 0 6px, color-mix(in srgb, var(--text) 5%, transparent) 6px 7px);
+  border-style: dashed; cursor: default;
+}
+
+.pl-ch { display: flex; align-items: center; gap: 4px; min-height: 22px; min-width: 0; }
+.pl-num { font-family: var(--mono); font-weight: 700; font-size: 13px; flex: none; }
+.pl-num[data-w="0"], .pl-num[data-hol] { color: var(--red-text); }
+.pl-num[data-w="6"] { color: var(--blue-text); }
+.pl-hn { font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.pl-hn.ex { color: var(--accent-text); font-weight: 600; }
+.pl-mi { display: inline-flex; color: var(--muted); flex: none; }
+.pl-meter { min-width: 0; }
+
+/* 선택 상자: 넓은 폭의 마우스에서는 올리거나 포커스·선택이 있을 때만, 좁은 폭·터치에서는 항상 */
+.pl-selbox { display: inline-grid; place-items: center; width: 20px; height: 20px; flex: none; margin: 0; opacity: 0; cursor: pointer; }
+.pl-selbox input { width: 16px; height: 16px; margin: 0; accent-color: var(--accent-strong); cursor: pointer; }
+.pl-cell:hover .pl-selbox, .pl-cell:focus-within .pl-selbox, .pl-cell[data-sel] .pl-selbox, .pl-selbox:has(input:focus-visible) { opacity: 1; }
+@media (max-width: 900px), (pointer: coarse), (hover: none) { .pl-selbox { opacity: 1; } }
+@media (pointer: coarse) {
+  /* 터치: 36px 누름 영역을 칸 위 모서리에 둔다 */
+  .pl-selbox { width: var(--target); height: var(--target); margin: -8px 0 -8px -8px; }
+  .pl-selbox input { width: 20px; height: 20px; }
+}
+
+/* 칸 안 칩: 마우스에서는 작게(옮기기 단추·손잡이는 숨김. 옮기기는 Alt+방향키·Shift+F10·날짜 상세·끌기), 터치는 TaskChip 기본 크기 */
+.pl-chips { display: grid; gap: 3px; min-width: 0; }
+.pl-dots { display: none; }
+/* 끌기 고스트(body 아래의 복제본)는 칸 안 조상 선택자를 못 받으므로 같은 규칙을 복제본([data-compact])에도 준다 */
+@media (pointer: fine) {
+  .pl-cell .pl-chips .chip, .mo-ghost-card.chip[data-compact] { display: flex; width: 100%; min-height: 22px; padding: 0 2px; }
+  .pl-cell .pl-chips .chip .mv, .pl-cell .pl-chips .chip .grip, .pl-cell .pl-chips .chip .kind,
+  .mo-ghost-card[data-compact] .mv, .mo-ghost-card[data-compact] .grip, .mo-ghost-card[data-compact] .kind { display: none; }
+  .pl-cell .pl-chips .chip .main, .mo-ghost-card[data-compact] .main { min-height: 20px; padding: 0 4px 0 2px; gap: 4px; font-size: 11px; font-weight: 600; }
+  .pl-cell .pl-chips .chip .box, .mo-ghost-card[data-compact] .box { width: 12px; height: 12px; border-width: 1.5px; }
+}
+
+/* 달력이 좁으면(720px 이하) 칩 대신 점으로 요약한다. 상세는 날짜를 열어 본다 */
+@container plcal (max-width: 719px) {
+  .pl-cell { min-height: 58px; padding: 3px; gap: 2px; }
+  .pl-chips, .pl-hn { display: none; }
+  .pl-dots { display: flex; flex-wrap: wrap; gap: 3px; }
+  .pl-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--c); }
+  .pl-dots i[data-done] { opacity: 0.35; }
+  .pl-num { font-size: 12px; }
+  .pl-meter .num { display: none; }
+  /* 좁은 칸(약 46px): 날짜 숫자(`11/15` 처럼 5자)와 선택 상자는 한 줄에 못 들어가 서로 가린다. 숫자·메모 줄 아래에 선택 상자만의 줄을 둔다(겹침 0) */
+  .pl-ch { gap: 0 2px; flex-wrap: wrap; }
+  .pl-ch .pl-mi { margin-left: auto; }
+  .pl-ch .pl-grow { display: none; }
+  .pl-selbox { order: 5; flex: 1 1 100%; width: auto; height: 28px; margin: 0; padding: 0; place-items: center start; }
+  .pl-selbox input { width: 16px; height: 16px; }
+}
+
+/* 놓을 곳: motion.css 의 점선·채움에 더해 transform 대신 그림자로 받는 칸을 드러낸다 */
+.pl-cell.mo-drop-over, .pl-dayhost.mo-drop-over, .pl-vault.mo-drop-over { box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow); position: relative; z-index: 1; }
+[data-landing] { visibility: hidden; }
+/* 접힌 보관함 단추 위에 머무르는 중: 채움이 차오르다가 다 차면 펼친다(길이는 --dwell, drag.ts 의 DWELL_MS 가 정한다) */
+.pl-toolbar [data-vault-toggle].mo-drop-over {
+  background: linear-gradient(var(--accent-soft), var(--accent-soft)) no-repeat left / 0 100%, var(--bg);
+  border-color: var(--accent-strong); outline: 1px dashed var(--accent-strong); outline-offset: 2px;
+  animation: pl-dwell var(--dwell) linear forwards;
+}
+@keyframes pl-dwell { from { background-size: 0 100%, auto; } to { background-size: 100% 100%, auto; } }
+
+/* 날짜 상세 패널과 보관함 */
+.pl-dayhost { min-width: 0; }
+.pl-vt { display: flex; align-items: center; gap: 8px; font-size: 15px; margin: 0 0 8px; }
+.pl-vcount { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.pl-vault { display: grid; gap: 8px; align-content: start; }
+.pl-vault[hidden] { display: none; }
+.pl-grp + .pl-grp { margin-top: 4px; }
+.pl-gh { display: flex; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 6px; min-width: 0; }
+.pl-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); flex: none; }
+.pl-gname { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pl-gcount { margin-left: auto; font-size: 12px; }
+.pl-items { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.pl-items .chip { max-width: 100%; }
+
+/* 일괄 작업 막대: 화면 하단에 붙는다(sticky, safe-area). 화면 본문 끝에 있으므로 내용을 가리지 않는다 */
+.pl-bar {
+  position: sticky; bottom: 0; z-index: var(--z-sticky); display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  padding: 8px 12px; padding-bottom: max(8px, env(safe-area-inset-bottom));
+  padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right));
+  background: var(--panel2); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow);
+}
+.pl-bcount { font-weight: 600; white-space: nowrap; }
+.pl-bgroup { display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.pl-lv {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 2px 10px; border-radius: 999px; font-size: 13px; white-space: nowrap;
+  border: 1px solid var(--line); background: var(--bg); color: var(--text);
+}
+.pl-lv:hover:not(:disabled) { background: var(--panel); }
+.pl-lvlabel { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+@media (pointer: coarse) { .pl-lv { min-height: var(--target); } }
+/* 좁은 폭: 윗줄(선택 수 · 더 보기 · 선택 해제) + 아랫줄(바쁨 정도 5단계, 넘치면 가로 스크롤). 두 줄이라 화면 높이의 15% 이내다 */
+.pl-bar.narrow { gap: 6px 8px; padding-top: 6px; padding-left: max(10px, env(safe-area-inset-left)); padding-right: max(10px, env(safe-area-inset-right)); }
+.pl-bar.narrow .pl-levels { order: 9; flex: 1 1 100%; flex-wrap: nowrap; overflow-x: auto; gap: 4px; padding-bottom: 2px; scrollbar-width: thin; }
+.pl-bar.narrow .pl-lv { flex: none; padding: 2px 8px; gap: 4px; }
+.pl-more { display: grid; gap: 2px; }
+.pl-mitem {
+  display: flex; align-items: center; min-height: 36px; padding: 4px 12px; border: 0; border-radius: var(--radius); background: transparent;
+  color: var(--text); text-align: left; font-size: 14px;
+}
+.pl-mitem:hover:not(:disabled) { background: var(--panel); }

@@ -1,0 +1,2212 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>시험 공부 플래너</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22512%22 height=%22512%22 viewBox=%220 0 100 100%22%3E%3Crect x=%220%22 y=%220%22 width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%23d97757%22/%3E%3Cg transform=%22translate(13 13) scale(3.0833333333333335)%22 fill=%22none%22 stroke=%22%23ffffff%22 stroke-width=%222.75%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M8 2v3%22/%3E%3Cpath d=%22M16 2v3%22/%3E%3Crect x=%223%22 y=%223%22 width=%2218%22 height=%2218%22 rx=%222%22/%3E%3Cpath d=%22M3 9h18%22/%3E%3Cpath d=%22m9 15 2 2 4-4%22/%3E%3C/g%3E%3C/svg%3E">
+<style>
+:root {
+  --bg: #FAF9F5; --panel: #F0EEE6; --panel2: #E8E6DC; --text: #1F1E1D; --muted: #6B6A64; --line: #DEDBCD;
+  --accent: #D97757; --accent-strong: #B5502D; --accent-ink: #FFFFFF; --focus: #D97757;
+  --red: #C8423B; --red-text: #B0332C; --blue-text: #2F6FA3; --green-text: #3F7A4D;
+  --lv-calm: #5B9A68; --lv-easy: #9AAE4B; --lv-normal: #D8A532; --lv-busy: #E07B39; --lv-packed: #C8423B;
+  --fillmax: 34%; --shadow: 0 8px 30px rgba(31, 30, 29, .16);
+  --font: "Pretendard Variable", Pretendard, -apple-system, system-ui, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --mono: "Geist Mono", "Pretendard Variable", Pretendard, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --field: 15px;
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg: #262624; --panel: #30302E; --panel2: #3A3A37; --text: #F5F4EE; --muted: #A8A69C; --line: #4A4A45;
+  --accent: #D97757; --accent-strong: #C6613F; --red: #E0645C; --red-text: #FF8F86; --blue-text: #8DB8E6; --green-text: #8CC79A;
+  --lv-calm: #6FB07C; --lv-easy: #B0C45E; --lv-normal: #E3B54A; --lv-busy: #E88A4B; --lv-packed: #E0645C;
+  --fillmax: 26%; --shadow: 0 8px 30px rgba(0, 0, 0, .5); color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="auto"] {
+    --bg: #262624; --panel: #30302E; --panel2: #3A3A37; --text: #F5F4EE; --muted: #A8A69C; --line: #4A4A45;
+    --accent: #D97757; --accent-strong: #C6613F; --red: #E0645C; --red-text: #FF8F86; --blue-text: #8DB8E6; --green-text: #8CC79A;
+    --lv-calm: #6FB07C; --lv-easy: #B0C45E; --lv-normal: #E3B54A; --lv-busy: #E88A4B; --lv-packed: #E0645C;
+    --fillmax: 26%; --shadow: 0 8px 30px rgba(0, 0, 0, .5); color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 var(--font); }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+[hidden] { display: none !important; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 16px; padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+
+/* 공통 컨트롤 */
+.btn { border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 6px 12px; min-height: 34px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.btn:hover { background: var(--panel2); }
+.btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.btn.primary { background: var(--accent-strong); color: var(--accent-ink); border-color: var(--accent-strong); font-weight: 600; }
+.btn.primary:hover { opacity: .88; }
+.btn.danger { color: var(--red-text); border-color: var(--red-text); background: transparent; }
+.btn[disabled] { opacity: .45; cursor: default; }
+.icon { width: 32px; height: 32px; min-width: 32px; display: inline-grid; place-items: center; border: 1px solid transparent; background: transparent; border-radius: 8px; padding: 0; }
+.icon:hover { background: var(--panel2); }
+.icon[aria-pressed="true"] { background: var(--panel2); border-color: var(--line); }
+.icon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+input[type="text"], input[type="date"], input[type="number"], input[type="url"], select, textarea {
+  border: 1px solid var(--line); background: var(--bg); border-radius: 8px; padding: 6px 10px; min-height: 34px; width: 100%; font-size: var(--field);
+}
+textarea { resize: vertical; min-height: 72px; }
+input[type="number"] { width: 72px; text-align: center; font-family: var(--mono); }
+label.f { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+label.f > span { font-weight: 600; }
+.err { color: var(--red-text); font-size: 13px; margin: 6px 0 0; text-decoration: underline wavy var(--red-text) 1px; text-underline-offset: 3px; text-decoration-skip-ink: none; }
+.muted { color: var(--muted); }
+.mono { font-family: var(--mono); }
+
+/* 상단 */
+.top { position: sticky; top: 0; z-index: 20; background: var(--bg); border-bottom: 1px solid var(--line); padding-top: env(safe-area-inset-top); }
+.top-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; flex-wrap: wrap; }
+.top-row .spacer { flex: 1; }
+.exam-pick { min-width: 140px; max-width: 280px; width: auto; font-weight: 600; }
+.sync { font-size: 12px; color: var(--muted); max-width: 260px; text-align: right; }
+.sync[data-s="error"] { color: var(--red-text); }
+.tabs { display: flex; gap: 4px; }
+.tab { border: 0; background: transparent; padding: 8px 14px; border-bottom: 2px solid transparent; font-weight: 600; color: var(--muted); min-height: 38px; }
+.tab[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); }
+.hprog { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+.bar { height: 8px; border-radius: 4px; background: var(--panel2); overflow: hidden; width: 100%; min-width: 60px; }
+.bar > i { display: block; height: 100%; background: var(--accent); border-radius: 4px; }
+.hprog .bar { width: 90px; }
+
+main { padding: 16px 0 80px; }
+h2.sec { font-size: 16px; margin: 0 0 10px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+.stack { display: grid; gap: 16px; }
+.grid4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* 과목 칩 */
+.subchip { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 0; text-align: left; border-radius: 8px; padding: 4px 10px; min-height: 34px; max-width: 100%;
+  background: color-mix(in srgb, var(--c) 30%, var(--bg)); border: 1px solid color-mix(in srgb, var(--c) 75%, var(--text) 10%); }
+.subchip b { font-weight: 600; }
+.subchip small { color: var(--muted); font-size: 12px; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.subchip[data-dragging] { opacity: .4; }
+.eday { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 10px; padding: 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); align-items: start; }
+.eday + .eday { margin-top: 8px; }
+.eday .lab { font-weight: 600; }
+.eday .lab small { display: block; font-weight: 400; color: var(--muted); }
+.eday[data-drop] { outline: 2px dashed var(--focus); outline-offset: -2px; background: var(--panel); }
+.eday .items { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+form.add { display: inline-flex; gap: 4px; align-items: center; }
+form.add input { width: 150px; min-height: 34px; }
+
+/* 준비 계획 */
+.board { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 16px; align-items: start; }
+.vault { position: sticky; top: 104px; max-height: calc(100vh - 124px); overflow: auto; }
+.vault .grp + .grp { margin-top: 12px; }
+.vault .gh { display: flex; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 6px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); border: 1px solid color-mix(in srgb, var(--c) 60%, var(--text)); display: inline-block; flex: none; }
+.vault .items, .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.vault[data-drop], .day[data-drop] { outline: 2px dashed var(--focus); outline-offset: -2px; }
+.vault-toggle { display: none; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+.toolbar .spacer { flex: 1; }
+.bulk { position: sticky; top: 104px; z-index: 10; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; margin-bottom: 10px; }
+.banner { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border: 1px solid var(--red-text); border-radius: 10px; padding: 8px 12px; margin-bottom: 10px; background: color-mix(in srgb, var(--red) 12%, var(--bg)); }
+.week { font-size: 12px; color: var(--muted); margin: 14px 2px 6px; font-family: var(--mono); }
+.day { --lv: var(--lv-normal); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; margin-bottom: 6px; background: var(--panel);
+  background: color-mix(in srgb, var(--lv) calc(var(--fill, 0) * var(--fillmax)), var(--bg)); }
+.day[data-level="calm"] { --lv: var(--lv-calm); }
+.day[data-level="easy"] { --lv: var(--lv-easy); }
+.day[data-level="normal"] { --lv: var(--lv-normal); }
+.day[data-level="busy"] { --lv: var(--lv-busy); }
+.day[data-level="packed"] { --lv: var(--lv-packed); }
+.day[data-over] { --lv: var(--red); border-color: var(--red-text); }
+.day[data-today] { outline: 2px solid var(--focus); outline-offset: 1px; }
+.day[data-sel] { box-shadow: inset 0 0 0 2px var(--accent-strong); }
+.day[data-past] { opacity: .72; }
+.dh { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.dh input[type="checkbox"] { width: 18px; height: 18px; margin: 0; accent-color: var(--accent-strong); }
+.date { font-weight: 700; min-width: 72px; font-family: var(--mono); font-size: 14px; }
+.date .wd { font-family: var(--font); font-weight: 600; margin-left: 4px; }
+.date[data-w="0"], .date[data-hol] { color: var(--red-text); }
+.date[data-w="6"] { color: var(--blue-text); }
+.date[data-hol] { color: var(--red-text); }
+.tag { font-size: 12px; padding: 0 7px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); line-height: 20px; white-space: nowrap; }
+.tag.today { border-color: var(--focus); color: var(--focus); font-weight: 600; }
+.note { flex: 1 1 140px; min-width: 100px; max-width: 280px; min-height: 28px; padding: 2px 8px; border-color: transparent; background: transparent; font-size: 13px; }
+.note:hover, .note:focus { border-color: var(--line); background: var(--bg); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--bg); }
+.seg button { border: 0; background: transparent; padding: 2px 9px; min-height: 28px; font-size: 13px; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--accent-strong); color: var(--accent-ink); }
+.cnt { font-family: var(--mono); font-size: 13px; min-width: 40px; text-align: right; }
+.cnt[data-over] { color: var(--red-text); font-weight: 700; }
+.eline { font-size: 12px; margin: 4px 0 0 26px; color: var(--muted); }
+.chips { margin-top: 6px; min-height: 12px; }
+
+.chip { display: inline-flex; align-items: center; gap: 2px; border-radius: 8px; padding: 0 2px 0 2px; min-height: 32px; max-width: 100%;
+  background: color-mix(in srgb, var(--c) 32%, var(--bg)); border: 1px solid color-mix(in srgb, var(--c) 75%, var(--text) 10%); }
+.chip[data-done] .lb { text-decoration: line-through; opacity: .6; }
+.chip[data-dragging] { opacity: .4; }
+.chip .ck, .chip .lb { border: 0; background: transparent; }
+.chip .ck { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 6px; padding: 0; }
+.chip .ck span { width: 16px; height: 16px; border: 1.8px solid var(--text); border-radius: 4px; display: grid; place-items: center; background: var(--bg); }
+.chip .ck svg { width: 12px; height: 12px; stroke: var(--text); fill: none; stroke-width: 3; opacity: 0; }
+/* check */
+.chip[data-done] .ck svg { opacity: 1; }
+.chip .lb { padding: 2px 6px; text-align: left; min-height: 28px; display: inline-flex; align-items: center; gap: 6px; }
+.chip .lb svg { width: 14px; height: 14px; stroke: var(--muted); fill: none; stroke-width: 1.8; }
+.chip[draggable="true"] { cursor: grab; }
+
+/* 오늘 */
+.today { display: grid; gap: 16px; max-width: 760px; }
+.trow { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; margin-bottom: 6px;
+  background: color-mix(in srgb, var(--c) 28%, var(--bg)); border: 1px solid color-mix(in srgb, var(--c) 70%, var(--text) 10%); }
+.trow .ck { width: 36px; height: 36px; border: 0; background: transparent; display: grid; place-items: center; border-radius: 8px; padding: 0; }
+.trow .ck span { width: 22px; height: 22px; border: 2px solid var(--text); border-radius: 6px; background: var(--bg); display: grid; place-items: center; }
+.trow .ck svg { width: 15px; height: 15px; stroke: var(--text); fill: none; stroke-width: 3; opacity: 0; }
+.trow[data-done] .ck svg { opacity: 1; }
+.trow[data-done] .tl { text-decoration: line-through; opacity: .6; }
+.trow .tl { flex: 1; font-size: 16px; font-weight: 600; }
+.trow .tl small { display: block; font-weight: 400; font-size: 12px; color: var(--muted); }
+.prow { display: grid; grid-template-columns: 120px minmax(0, 1fr) 56px; gap: 10px; align-items: center; margin-bottom: 6px; font-size: 14px; }
+.big { font-size: 28px; font-weight: 700; font-family: var(--mono); }
+
+/* 패널 */
+#scrim { position: fixed; inset: 0; background: rgba(0, 0, 0, .35); z-index: 40; }
+#panel { position: fixed; z-index: 50; background: var(--bg); color: var(--text); border: 1px solid var(--line); box-shadow: var(--shadow); display: flex; flex-direction: column; }
+#panel.drawer { top: 0; right: 0; bottom: 0; width: min(460px, 100vw); border-radius: 12px 0 0 12px; }
+#panel.sheet { left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(480px, calc(100vw - 24px)); max-height: min(78vh, 640px); border-radius: 14px; }
+#panel > header { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--line); padding-top: max(12px, env(safe-area-inset-top)); }
+#panel > header h2 { margin: 0; font-size: 16px; }
+#panelBody { padding: 14px; overflow: auto; display: grid; gap: 14px; align-content: start; padding-bottom: max(14px, env(safe-area-inset-bottom)); }
+.pick { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; width: 100%; text-align: left; border-radius: 8px; padding: 6px 10px; min-height: 40px; border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--lv) calc(var(--fill, 0) * var(--fillmax)), var(--bg)); --lv: var(--lv-normal); }
+.pick[data-level="calm"] { --lv: var(--lv-calm); } .pick[data-level="easy"] { --lv: var(--lv-easy); } .pick[data-level="busy"] { --lv: var(--lv-busy); } .pick[data-level="packed"] { --lv: var(--lv-packed); }
+.pick[data-over] { --lv: var(--red); }
+.pick[aria-current="true"] { box-shadow: inset 0 0 0 2px var(--text); }
+.pick small { color: var(--muted); }
+.swatches { display: flex; gap: 8px; flex-wrap: wrap; }
+.sw { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--line); background: var(--c); padding: 0; }
+.sw[aria-pressed="true"] { border-color: var(--text); box-shadow: 0 0 0 2px var(--bg) inset; }
+.plan { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.plan label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); justify-items: start; }
+.links { display: grid; gap: 6px; }
+.link { display: flex; align-items: center; gap: 6px; }
+.link a { color: var(--blue-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.confirm { border: 1px solid var(--red-text); border-radius: 10px; padding: 10px; display: grid; gap: 8px; background: color-mix(in srgb, var(--red) 10%, var(--bg)); }
+.drop-area { border: 1px solid var(--line); border-radius: 10px; padding: 8px; }
+.drop-area[data-dragover] { border: 2px dashed var(--focus); background: var(--panel); }
+.drop-area textarea { border: 0; min-height: 90px; font-family: var(--mono); font-size: 13px; }
+.field-group { display: grid; gap: 6px; }
+.field-group > .t { font-weight: 600; font-size: 13px; color: var(--muted); }
+
+#toast { position: fixed; left: 50%; bottom: max(18px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 60; background: var(--accent-strong); color: var(--accent-ink); padding: 10px 14px; border-radius: 10px; max-width: min(520px, calc(100vw - 32px)); box-shadow: var(--shadow); font-size: 14px; }
+
+@media (max-width: 900px) {
+  .board { grid-template-columns: minmax(0, 1fr); }
+  .vault { position: static; max-height: none; }
+  .vault-toggle { display: inline-flex; }
+  .vault[data-collapsed] { display: none; }
+  .bulk { top: 96px; }
+  .eday { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 720px), (pointer: coarse) {
+  :root { --field: 16px; }
+  input[type="text"], input[type="date"], input[type="number"], input[type="url"], select, textarea { font-size: 16px; }
+  .note { font-size: 16px; }
+}
+@media (max-width: 720px) {
+  .grid4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .exam-pick { max-width: 100%; flex: 1; }
+  .hprog { display: none; }
+  .prow { grid-template-columns: 90px minmax(0, 1fr) 48px; }
+  #panel.sheet { top: auto; bottom: 0; left: 0; transform: none; width: 100vw; max-height: 86vh; border-radius: 14px 14px 0 0; }
+  #panel.drawer { width: 100vw; border-radius: 0; }
+}
+@media print { .top, #toast { display: none; } }
+
+/* 아이콘, 칩, 팝오버 (추가) */
+svg.i { width: 1em; height: 1em; flex: none; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.tab { display: inline-flex; align-items: center; gap: 6px; }
+.tab svg.i { width: 16px; height: 16px; }
+.sz { display: inline-flex; gap: 8px; align-items: center; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.sz span { display: inline-flex; align-items: center; gap: 2px; }
+.sz svg.i { width: 13px; height: 13px; }
+.subchip .l1 { display: flex; align-items: center; gap: 8px; }
+.vault .gh .sz { margin-left: auto; }
+.chip .lb svg.k { width: 14px; height: 14px; stroke: var(--text); opacity: .75; }
+.chip .lb svg.mv { width: 13px; height: 13px; stroke: var(--muted); }
+.trow .tl svg.k { width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px; }
+.kind-recap .lb { font-style: normal; }
+
+/* 바쁨 정도 칩 */
+.meter { display: inline-flex; gap: 2px; align-items: flex-end; height: 12px; }
+.meter i { width: 4px; border-radius: 1px; background: color-mix(in srgb, var(--text) 18%, transparent); }
+.meter i:nth-child(1) { height: 5px; } .meter i:nth-child(2) { height: 7px; } .meter i:nth-child(3) { height: 9px; } .meter i:nth-child(4) { height: 11px; } .meter i:nth-child(5) { height: 12px; }
+.meter i[data-on] { background: var(--lvc, var(--lv-normal)); }
+[data-lv="calm"] { --lvc: var(--lv-calm); } [data-lv="easy"] { --lvc: var(--lv-easy); } [data-lv="normal"] { --lvc: var(--lv-normal); } [data-lv="busy"] { --lvc: var(--lv-busy); } [data-lv="packed"] { --lvc: var(--lv-packed); }
+.lvchip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--bg); border-radius: 999px; padding: 2px 10px; min-height: 28px; font-size: 13px; white-space: nowrap; }
+.lvchip:hover { background: var(--panel2); }
+.lvchip[aria-expanded="true"] { border-color: var(--accent); }
+.memo { display: inline-flex; align-items: center; gap: 4px; border: 1px solid transparent; background: transparent; border-radius: 8px; min-height: 28px; max-width: 240px; padding: 0 6px; font-size: 13px; color: var(--muted); }
+.memo:hover { background: var(--panel2); }
+.memo span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
+.memo svg.i { width: 15px; height: 15px; }
+.memo[data-has] svg.i { color: var(--accent-strong); }
+.dh .grow { flex: 1; }
+.cnt { display: inline-flex; align-items: center; gap: 4px; justify-content: flex-end; }
+.cnt svg.i { width: 14px; height: 14px; }
+
+/* 팝오버 */
+.pop { position: fixed; z-index: 45; width: 260px; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 8px; display: grid; gap: 4px; }
+.pop .opt { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; width: 100%; text-align: left; border: 0; background: transparent; border-radius: 8px; padding: 6px 8px; min-height: 36px; }
+.pop .opt:hover { background: var(--panel2); }
+.pop .opt[aria-checked="true"] { background: var(--panel); font-weight: 600; box-shadow: inset 0 0 0 1px var(--accent); }
+.pop .opt small { color: var(--muted); font-family: var(--mono); }
+.pop textarea { min-height: 84px; }
+.pop .ph { font-size: 13px; font-weight: 600; color: var(--muted); padding: 2px 4px; }
+@media (max-width: 720px) { .pop { left: 8px !important; right: 8px; top: auto !important; bottom: max(8px, env(safe-area-inset-bottom)); width: auto; } }
+
+/* 편집 모드 */
+.btn[aria-pressed="true"] { background: var(--accent-strong); color: var(--accent-ink); border-color: var(--accent-strong); }
+.bulk .lvchip { cursor: pointer; }
+.chip[data-kind="리캡"], .trow[data-kind="리캡"] { border-style: dashed; }
+.pg-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+.pg-wrap .pg { min-width: 820px; }
+@media print { .top, #toast, .noprint, .pop { display: none !important; } main { padding: 0; } body { background: #fff; } .pg-wrap { border: 0; overflow: visible; } .pg-wrap .pg { min-width: 0; } }
+.tab { white-space: nowrap; }
+@media (max-width: 720px) {
+  .tabs { gap: 0; }
+  .tab { flex: 1; justify-content: center; padding: 8px 4px; gap: 4px; font-size: 13px; }
+}
+
+/* 준비 계획: 달력 그리드 + 오른쪽 상세 */
+.board { grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; }
+.side { position: sticky; top: 104px; max-height: calc(100vh - 124px); overflow: auto; display: grid; gap: 12px; align-content: start; }
+.vault { position: static; max-height: none; }
+.vt { margin: 0 0 8px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.dp .date { min-width: 0; margin: 0; font-size: 18px; }
+.dp { display: grid; gap: 8px; background: var(--panel); }
+.dp .chips { min-height: 28px; }
+.cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.cal .wh { text-align: center; font-size: 12px; font-weight: 600; color: var(--muted); padding: 4px 0; }
+.cal .wh[data-w="0"] { color: var(--red-text); } .cal .wh[data-w="6"] { color: var(--blue-text); }
+.cal .day { margin: 0; padding: 6px; min-height: 108px; border-radius: 8px; display: flex; flex-direction: column; gap: 4px; min-width: 0; cursor: pointer; }
+.cal .day.pad { background: repeating-linear-gradient(45deg, transparent 0 6px, color-mix(in srgb, var(--text) 5%, transparent) 6px 7px); border-style: dashed; cursor: default; }
+.day[data-cur], .day[data-sel] { box-shadow: inset 0 0 0 2px var(--accent-strong); outline: 0; }
+.day[data-today] { outline: 2px solid var(--focus); outline-offset: 1px; }
+.ch { display: flex; align-items: center; gap: 4px; min-height: 22px; }
+.ch input[type="checkbox"] { width: 16px; height: 16px; margin: 0; accent-color: var(--accent-strong); flex: none; }
+.dnum { border: 0; background: transparent; padding: 0 2px; min-height: 22px; font-family: var(--mono); font-weight: 700; font-size: 13px; border-radius: 4px; }
+.dnum[data-w="0"], .dnum[data-hol] { color: var(--red-text); } .dnum[data-w="6"] { color: var(--blue-text); }
+.hn { font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.hn.ex { color: var(--accent-strong); font-weight: 600; }
+.ch .grow { flex: 1; }
+.ch .mi svg.i, .ch .ov svg.i { width: 13px; height: 13px; }
+.ch .ov { color: var(--red-text); display: inline-flex; }
+.cc-list { display: grid; gap: 3px; }
+.cc { display: flex; align-items: center; gap: 4px; padding: 1px 5px; border-radius: 5px; font-size: 11px; font-weight: 600; min-height: 20px; overflow: hidden; white-space: nowrap; cursor: grab;
+  background: color-mix(in srgb, var(--c) 18%, var(--bg)); border: 1px solid color-mix(in srgb, var(--c) 60%, transparent); color: var(--text); }
+.cc[data-kind="리캡"] { border-style: dashed; }
+.cc[data-done] { text-decoration: line-through; opacity: .6; }
+.cc[data-dragging] { opacity: .4; }
+.cc svg.k { width: 11px; height: 11px; }
+.cc span { overflow: hidden; text-overflow: ellipsis; }
+.dots { display: none; }
+.bulk { position: static; display: grid; gap: 10px; margin: 0; background: var(--panel); }
+.bulk .row { flex-wrap: wrap; gap: 6px; }
+@media (max-width: 900px) {
+  .board { grid-template-columns: minmax(0, 1fr); }
+  .side { position: static; max-height: none; overflow: visible; }
+  .side .dp { display: none; }
+  .vault[data-collapsed] { display: none; }
+  .vault-toggle { display: inline-flex; }
+}
+@media (max-width: 720px) {
+  .cal { gap: 3px; }
+  .cal .day { min-height: 58px; padding: 3px; gap: 2px; }
+  .cc-list, .hn, .ch .mi { display: none; }
+  .dots { display: flex; flex-wrap: wrap; gap: 3px; }
+  .dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--c); }
+  .dots i[data-done] { opacity: .35; }
+  .dnum { font-size: 12px; min-height: 24px; min-width: 24px; }
+  .ch { gap: 2px; }
+  .ch .meter { margin-left: auto; transform: scale(.8); transform-origin: right center; }
+  .bulk { position: sticky; bottom: 0; z-index: 10; }
+}
+@media (max-width: 720px) {
+  .cal .day { position: relative; }
+  .ch .meter { position: absolute; right: 4px; bottom: 4px; margin: 0; transform: none; height: 10px; }
+  .ch .meter i { width: 3px; }
+}
+
+/* 움직임 */
+.chip, .cc, .subchip, .qchip { transition: transform .16s cubic-bezier(.34,1.56,.64,1), box-shadow .16s ease, opacity .16s ease; }
+@media (hover: hover) { .chip:hover, .subchip:hover { transform: translateY(-1px); box-shadow: 0 4px 10px color-mix(in srgb, var(--text) 12%, transparent); } .cc:hover { transform: translateY(-1px); } }
+.chip:active, .cc:active, .subchip:active { transform: scale(.97); }
+[data-dragging] { opacity: .3 !important; outline: 1.5px dashed var(--accent); outline-offset: 1px; }
+.dragimg { position: fixed; left: -2000px; top: -2000px; padding: 18px; pointer-events: none; }
+.dragimg > * { transform: rotate(-4deg) scale(1.06); box-shadow: 0 14px 30px rgba(31,30,29,.32); opacity: 1 !important; }
+.cal .day, .eday, .vault, .dp { transition: transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease, background-color .2s ease; }
+body[data-drag="task"] .cal .day:not(.pad), body[data-drag="sub"] .eday { outline: 1px dashed color-mix(in srgb, var(--accent) 55%, transparent); outline-offset: -1px; }
+.cal .day[data-drop], .eday[data-drop], .vault[data-drop], .dp[data-drop] { outline: 2px solid var(--accent) !important; outline-offset: -2px; position: relative; z-index: 3;
+  box-shadow: 0 10px 26px color-mix(in srgb, var(--accent) 32%, transparent); }
+.cal .day[data-drop] { transform: scale(1.045); }
+.eday[data-drop], .vault[data-drop], .dp[data-drop] { transform: scale(1.012); background: var(--panel); }
+.vault, .dp, .vault[data-drop], .dp[data-drop] { top: auto; }
+.vault[data-drop], .dp[data-drop] { position: static; transform: none; }
+.cal .day[data-drop]::after { content: ""; position: absolute; inset: 4px; border-radius: 6px; border: 1.5px dashed var(--accent); opacity: .7; pointer-events: none; animation: dropPulse .9s ease-in-out infinite; }
+@keyframes dropPulse { 50% { inset: 7px; opacity: .25; } }
+.quick { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 12px; font-size: 13px; }
+.qchip { display: inline-flex; align-items: center; gap: 4px; border: 1px dashed var(--line); background: transparent; border-radius: 999px; padding: 3px 11px 3px 8px; min-height: 30px; font-size: 13px; color: var(--muted); }
+.qchip:hover { border-style: solid; border-color: var(--accent); color: var(--text); transform: translateY(-1px); }
+.qchip svg.i { width: 13px; height: 13px; }
+form.add input { width: 190px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+
+/* 레이어 순서: 한 곳에서 정한다. 나중에 열리는 층이 위다. */
+:root { --z-sticky: 10; --z-top: 20; --z-scrim: 40; --z-panel: 50; --z-pop: 60; --z-drag: 200; --z-toast: 300; }
+.bulk { z-index: var(--z-sticky); }
+.top { z-index: var(--z-top); }
+#scrim { z-index: var(--z-scrim); }
+#panel { z-index: var(--z-panel); }
+.pop { z-index: var(--z-pop); }
+#toast { z-index: var(--z-toast); }
+
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="top" class="top"></header>
+  <main id="main"></main>
+</div>
+<div id="scrim" hidden></div>
+<section id="panel" role="dialog" aria-modal="true" aria-labelledby="panelTitle" hidden>
+  <header><h2 id="panelTitle"></h2><button id="panelClose" type="button" class="icon" aria-label="닫기" title="닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+  <div id="panelBody"></div>
+</section>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+<script>
+/* lucide 아이콘 (ISC 라이선스). 필요한 것만 담는다. */
+const ICONS = {
+ "plus": "<path d=\"M5 12h14\" /> <path d=\"M12 5v14\" />",
+ "x": "<path d=\"M18 6 6 18\" /> <path d=\"m6 6 12 12\" />",
+ "settings": "<path d=\"M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915\" /> <circle cx=\"12\" cy=\"12\" r=\"3\" />",
+ "database": "<ellipse cx=\"12\" cy=\"5\" rx=\"9\" ry=\"3\" /> <path d=\"M3 5V19A9 3 0 0 0 21 19V5\" /> <path d=\"M3 12A9 3 0 0 0 21 12\" />",
+ "trash-2": "<path d=\"M10 11v6\" /> <path d=\"M14 11v6\" /> <path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6\" /> <path d=\"M3 6h18\" /> <path d=\"M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\" />",
+ "calendar-days": "<path d=\"M8 2v3\" /> <path d=\"M16 2v3\" /> <rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" /> <path d=\"M3 9h18\" /> <path d=\"M8 13h.01\" /> <path d=\"M12 13h.01\" /> <path d=\"M16 13h.01\" /> <path d=\"M8 17h.01\" /> <path d=\"M12 17h.01\" /> <path d=\"M16 17h.01\" />",
+ "flag": "<path d=\"M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528\" />",
+ "check": "<path d=\"M20 6 9 17l-5-5\" />",
+ "book-open": "<path d=\"M12 5v16\" /> <path d=\"M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z\" />",
+ "pen-line": "<path d=\"M13 21h8\" /> <path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\" />",
+ "rotate-ccw": "<path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\" /> <path d=\"M3 3v5h5\" />",
+ "sticky-note": "<path d=\"M21 9a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 15 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z\" /> <path d=\"M15 3v5a1 1 0 0 0 1 1h5\" />",
+ "pencil": "<path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\" /> <path d=\"m15 5 4 4\" />",
+ "printer": "<path d=\"M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2\" /> <path d=\"M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6\" /> <rect x=\"6\" y=\"14\" width=\"12\" height=\"8\" rx=\"1\" />",
+ "download": "<path d=\"M12 15V3\" /> <path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\" /> <path d=\"m7 10 5 5 5-5\" />",
+ "calendar-range": "<rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" /> <path d=\"M16 2v3\" /> <path d=\"M3 9h18\" /> <path d=\"M8 2v3\" /> <path d=\"M17 13h-6\" /> <path d=\"M13 17H7\" /> <path d=\"M7 13h.01\" /> <path d=\"M17 17h.01\" />",
+ "list-checks": "<path d=\"M13 5h8\" /> <path d=\"M13 12h8\" /> <path d=\"M13 19h8\" /> <path d=\"m3 17 2 2 4-4\" /> <path d=\"m3 7 2 2 4-4\" />",
+ "sun": "<circle cx=\"12\" cy=\"12\" r=\"4\" /> <path d=\"M12 2v2\" /> <path d=\"M12 20v2\" /> <path d=\"m4.93 4.93 1.41 1.41\" /> <path d=\"m17.66 17.66 1.41 1.41\" /> <path d=\"M2 12h2\" /> <path d=\"M20 12h2\" /> <path d=\"m6.34 17.66-1.41 1.41\" /> <path d=\"m19.07 4.93-1.41 1.41\" />",
+ "triangle-alert": "<path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\" /> <path d=\"M12 9v4\" /> <path d=\"M12 17h.01\" />"
+};
+
+</script>
+<script>
+'use strict';
+/* 시험 공부 플래너 로직. DOM에 의존하지 않는다. */
+const Planner = (function () {
+  const LEVELS = [
+    { key: 'calm', label: '한가함' },
+    { key: 'easy', label: '여유' },
+    { key: 'normal', label: '보통' },
+    { key: 'busy', label: '바쁨' },
+    { key: 'packed', label: '매우 바쁨' },
+  ];
+  const LEVEL_KEYS = LEVELS.map((l) => l.key);
+  const DEFAULT_LIMITS = { calm: 8, easy: 4, normal: 3, busy: 2, packed: 1 };
+  /* 4단계(v1) 저장본의 단계 이름을 5단계로 옮긴다. */
+  const LEGACY_LEVELS = { relaxed: 'calm', medium: 'normal', tight: 'busy', busy: 'packed' };
+  const PALETTE = ['#C4705A', '#D9A441', '#7E9F6B', '#5F9EA0', '#6E8FBF', '#9A7DB8', '#C46A8E', '#8A8578'];
+  const MAX_DAYS = 120;
+  const MAX_COUNT = 30;
+  const MAX_TEXT = 2000;
+
+  /* 한국 공휴일(대체공휴일 포함). 공식 월력요항에서 확인된 날짜만 담는다. 날짜별로 직접 고칠 수 있다. */
+  const HOLIDAYS = {
+    '2026-01-01': '신정', '2026-02-16': '설날 연휴', '2026-02-17': '설날', '2026-02-18': '설날 연휴',
+    '2026-03-01': '삼일절', '2026-03-02': '대체공휴일', '2026-05-05': '어린이날', '2026-05-24': '부처님오신날',
+    '2026-05-25': '대체공휴일', '2026-06-03': '지방선거일', '2026-06-06': '현충일', '2026-08-15': '광복절',
+    '2026-08-17': '대체공휴일', '2026-09-24': '추석 연휴', '2026-09-25': '추석', '2026-09-26': '추석 연휴',
+    '2026-10-03': '개천절', '2026-10-05': '대체공휴일', '2026-10-09': '한글날', '2026-12-25': '성탄절',
+    '2027-01-01': '신정', '2027-02-06': '설날 연휴', '2027-02-07': '설날', '2027-02-08': '설날 연휴',
+    '2027-02-09': '대체공휴일', '2027-03-01': '삼일절', '2027-05-05': '어린이날', '2027-05-13': '부처님오신날',
+    '2027-06-06': '현충일', '2027-08-15': '광복절', '2027-08-16': '대체공휴일', '2027-09-14': '추석 연휴',
+    '2027-09-15': '추석', '2027-09-16': '추석 연휴', '2027-10-03': '개천절', '2027-10-04': '대체공휴일',
+    '2027-10-09': '한글날', '2027-10-11': '대체공휴일', '2027-12-25': '성탄절', '2027-12-27': '대체공휴일',
+  };
+
+  /* ---------- 날짜 ---------- */
+  const pad = (n) => String(n).padStart(2, '0');
+  function parseISO(s) {
+    const [y, m, d] = s.split('-').map(Number);
+    return new Date(Date.UTC(y, m - 1, d));
+  }
+  function toISO(dt) {
+    return dt.getUTCFullYear() + '-' + pad(dt.getUTCMonth() + 1) + '-' + pad(dt.getUTCDate());
+  }
+  function isISO(s) {
+    if (typeof s !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+    const dt = parseISO(s);
+    return !isNaN(dt) && toISO(dt) === s;
+  }
+  function addDays(s, n) {
+    const d = parseISO(s);
+    d.setUTCDate(d.getUTCDate() + n);
+    return toISO(d);
+  }
+  function diffDays(a, b) {
+    return Math.round((parseISO(b) - parseISO(a)) / 86400000);
+  }
+  function weekday(s) {
+    return parseISO(s).getUTCDay();
+  }
+  function rangeDays(a, b) {
+    const out = [];
+    if (!isISO(a) || !isISO(b) || a > b) return out;
+    for (let d = a; d <= b && out.length <= 400; d = addDays(d, 1)) out.push(d);
+    return out;
+  }
+  function todayISO() {
+    const n = new Date();
+    return n.getFullYear() + '-' + pad(n.getMonth() + 1) + '-' + pad(n.getDate());
+  }
+
+  let uidSeq = 0;
+  function uid() {
+    uidSeq += 1;
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 7) + uidSeq.toString(36);
+  }
+
+  const clampInt = (v, lo, hi) => {
+    const n = Math.round(Number(v));
+    return isNaN(n) ? lo : Math.min(hi, Math.max(lo, n));
+  };
+  const normName = (s) => String(s || '').trim().replace(/\s+/g, ' ');
+  const nameKey = (s) => normName(s).toLowerCase();
+
+  /* ---------- 상태 ---------- */
+  function newState() {
+    return { v: 3, limits: Object.assign({}, DEFAULT_LIMITS), recapDays: 7, week: {}, defPlan: Object.assign({}, DEFAULT_PLAN), library: [], exams: [], activeId: null, updatedAt: 0 };
+  }
+
+  function validateExamFields(f) {
+    const name = normName(f.name);
+    if (!name) return '시험 이름을 입력해 주세요.';
+    if (!isISO(f.start) || !isISO(f.end)) return '시작일과 종료일을 입력해 주세요.';
+    if (f.end < f.start) return '종료일은 시작일 이후여야 합니다.';
+    const prep = f.prepStart || addDays(f.start, -28);
+    if (!isISO(prep)) return '준비 시작일을 입력해 주세요.';
+    if (prep > f.end) return '준비 시작일은 종료일 이전이어야 합니다.';
+    if (diffDays(prep, f.end) + 1 > MAX_DAYS) return '준비 기간과 시험 기간을 합쳐 ' + MAX_DAYS + '일 이내로 정해 주세요.';
+    return null;
+  }
+
+  function newExam(f) {
+    const err = validateExamFields(f);
+    if (err) return { error: err };
+    return {
+      exam: {
+        id: uid(), name: normName(f.name), start: f.start, end: f.end,
+        prepStart: f.prepStart || addDays(f.start, -28), subs: [], tasks: [], days: {}, week: {},
+      },
+    };
+  }
+
+  /* 날짜가 바뀌면 범위를 벗어난 배치는 보관함으로 돌아간다. 돌아간 개수를 반환한다. */
+  function updateExamFields(exam, f) {
+    const err = validateExamFields(f);
+    if (err) return { error: err };
+    const prep = f.prepStart || addDays(f.start, -28);
+    exam.name = normName(f.name);
+    exam.start = f.start;
+    exam.end = f.end;
+    exam.prepStart = prep;
+    let unplaced = 0;
+    exam.tasks.forEach((t) => {
+      if (t.date && (t.date < prep || t.date > f.end)) { t.date = null; unplaced += 1; }
+    });
+    exam.subs.forEach((s) => {
+      if (s.examDate && (s.examDate < f.start || s.examDate > f.end)) s.examDate = null;
+    });
+    Object.keys(exam.days).forEach((k) => { if (k < prep || k > f.end) delete exam.days[k]; });
+    return { unplaced };
+  }
+
+  const prepDays = (exam) => rangeDays(exam.prepStart, exam.end);
+  const examDays = (exam) => rangeDays(exam.start, exam.end);
+  const getExam = (state, id) => state.exams.find((e) => e.id === id) || null;
+
+  /* ---------- 과목 라이브러리 ---------- */
+  function pickColor(state) {
+    const used = new Set(state.library.map((s) => s.color));
+    const free = PALETTE.find((c) => !used.has(c));
+    return free || PALETTE[state.library.length % PALETTE.length];
+  }
+  function findSubject(state, name) {
+    const k = nameKey(name);
+    return state.library.find((s) => nameKey(s.name) === k) || null;
+  }
+  function ensureSubject(state, name) {
+    const n = normName(name).slice(0, 40);
+    if (!n) return null;
+    let s = findSubject(state, n);
+    if (!s) {
+      s = { id: uid(), name: n, color: pickColor(state) };
+      state.library.push(s);
+    }
+    return s;
+  }
+  function renameSubject(state, id, name) {
+    const n = normName(name).slice(0, 40);
+    if (!n) return { error: '과목명을 입력해 주세요.' };
+    const other = findSubject(state, n);
+    if (other && other.id !== id) return { error: '이미 있는 과목명입니다.' };
+    const s = state.library.find((x) => x.id === id);
+    if (s) s.name = n;
+    return {};
+  }
+  const subjectOf = (state, es) => state.library.find((s) => s.id === es.subjectId) || { name: '(이름 없음)', color: PALETTE[7] };
+
+  /* ---------- 시험 과목 ---------- */
+  const DEFAULT_PLAN = { n: 2, m: 2, r: 1 };
+
+  function cleanPlan(p) {
+    const q = p && typeof p === 'object' ? p : DEFAULT_PLAN;
+    return { n: clampInt(q.n != null ? q.n : DEFAULT_PLAN.n, 0, MAX_COUNT), m: clampInt(q.m != null ? q.m : DEFAULT_PLAN.m, 0, MAX_COUNT), r: clampInt(q.r != null ? q.r : DEFAULT_PLAN.r, 0, MAX_COUNT) };
+  }
+  /* 요일별 기본 바쁨 정도: { '1': 'busy', ... } (0 일요일 ~ 6 토요일) */
+  function cleanWeek(w) {
+    const out = {};
+    if (w && typeof w === 'object') for (let i = 0; i < 7; i++) if (LEVEL_KEYS.includes(w[i])) out[i] = w[i];
+    return out;
+  }
+  /* 쉼표, 슬래시, 줄바꿈으로 나눈 여러 과목을 한 번에 추가한다. */
+  function addSubs(state, exam, text, examDate) {
+    const names = String(text || '').split(/[,，、\/\n]+/).map((x) => normName(x)).filter(Boolean);
+    let added = 0, dup = 0, last = null;
+    names.forEach((nm) => { const r = addSub(state, exam, nm, examDate); if (r.sub) { added++; last = r.sub; } else dup++; });
+    if (!names.length) return { error: '과목명을 입력해 주세요.' };
+    if (!added) return { error: '이미 등록된 과목입니다.' };
+    return { added, dup, sub: last };
+  }
+  function addSub(state, exam, name, examDate) {
+    const s = ensureSubject(state, name);
+    if (!s) return { error: '과목명을 입력해 주세요.' };
+    if (exam.subs.some((x) => x.subjectId === s.id)) return { error: '이미 등록된 과목입니다.' };
+    const es = {
+      id: uid(), subjectId: s.id, examDate: examDate && examDays(exam).includes(examDate) ? examDate : null,
+      range: '', comment: '', links: [], plan: cleanPlan(state.defPlan),
+    };
+    exam.subs.push(es);
+    syncTasks(exam, es);
+    return { sub: es };
+  }
+  function removeSub(exam, esId) {
+    exam.subs = exam.subs.filter((s) => s.id !== esId);
+    exam.tasks = exam.tasks.filter((t) => t.esId !== esId);
+  }
+  function setSubDate(exam, es, iso) {
+    if (iso && !examDays(exam).includes(iso)) return false;
+    es.examDate = iso || null;
+    return true;
+  }
+  function normalizeLink(url) {
+    let u = String(url || '').trim();
+    if (!u) return null;
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(u)) u = 'https://' + u;
+    try {
+      const p = new URL(u);
+      if (p.protocol !== 'http:' && p.protocol !== 'https:') return null;
+      return p.href;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  const planTotals = (plan) => ({ study: plan.n + plan.m, recap: plan.r });
+
+  function syncTasks(exam, es) {
+    const targets = [['s', es.plan.n + es.plan.m], ['r', es.plan.r]];
+    for (const [type, target] of targets) {
+      const list = exam.tasks.filter((t) => t.esId === es.id && t.type === type).sort((a, b) => a.seq - b.seq);
+      while (list.length > target) {
+        let idx = -1;
+        for (let i = list.length - 1; i >= 0; i--) if (!list[i].date) { idx = i; break; }
+        if (idx < 0) idx = list.length - 1;
+        const rm = list.splice(idx, 1)[0];
+        exam.tasks.splice(exam.tasks.indexOf(rm), 1);
+      }
+      list.forEach((t, i) => { t.seq = i + 1; });
+      while (list.length < target) {
+        const t = { id: uid(), esId: es.id, type, seq: list.length + 1, date: null, done: false };
+        list.push(t);
+        exam.tasks.push(t);
+      }
+    }
+  }
+  /* 분량을 줄일 때 배치된 할일이 몇 개 사라지는지 미리 센다. */
+  function previewPlanChange(exam, es, plan) {
+    let lost = 0;
+    for (const [type, target] of [['s', plan.n + plan.m], ['r', plan.r]]) {
+      const list = exam.tasks.filter((t) => t.esId === es.id && t.type === type);
+      const surplus = Math.max(0, list.length - target);
+      const unplaced = list.filter((t) => !t.date).length;
+      lost += Math.max(0, surplus - unplaced);
+    }
+    return lost;
+  }
+  function setPlan(exam, es, plan) {
+    es.plan = { n: clampInt(plan.n, 0, MAX_COUNT), m: clampInt(plan.m, 0, MAX_COUNT), r: clampInt(plan.r, 0, MAX_COUNT) };
+    syncTasks(exam, es);
+  }
+
+  function taskLabel(state, exam, t) {
+    const es = exam.subs.find((s) => s.id === t.esId);
+    if (!es) return '';
+    const name = subjectOf(state, es).name;
+    if (t.type === 'r') return name + ' 리캡 ' + t.seq + '/' + es.plan.r;
+    return name + ' ' + t.seq + '/' + (es.plan.n + es.plan.m);
+  }
+  function taskKind(exam, t) {
+    const es = exam.subs.find((s) => s.id === t.esId);
+    if (!es) return '';
+    if (t.type === 'r') return '리캡';
+    return t.seq <= es.plan.n ? '교재' : '문제집';
+  }
+
+  /* ---------- 날짜별 설정과 배치 ---------- */
+  function isHoliday(exam, iso) {
+    const d = exam.days[iso];
+    if (d && typeof d.holiday === 'boolean') return d.holiday;
+    return !!HOLIDAYS[iso];
+  }
+  function holidayName(exam, iso) {
+    if (!isHoliday(exam, iso)) return '';
+    return HOLIDAYS[iso] || '휴일';
+  }
+  function defaultLevel(exam, iso) {
+    const w = weekday(iso);
+    if (isHoliday(exam, iso)) return 'calm';
+    if (exam.week && LEVEL_KEYS.includes(exam.week[w])) return exam.week[w];
+    return w === 0 || w === 6 ? 'calm' : 'normal';
+  }
+  function levelOf(exam, iso) {
+    const d = exam.days[iso];
+    return d && LEVEL_KEYS.includes(d.level) ? d.level : defaultLevel(exam, iso);
+  }
+  function tidyDay(exam, iso) {
+    const d = exam.days[iso];
+    if (d && !d.level && !d.note && typeof d.holiday !== 'boolean') delete exam.days[iso];
+  }
+  function setDayLevel(exam, dates, level) {
+    dates.forEach((iso) => {
+      if (level && !LEVEL_KEYS.includes(level)) return;
+      const d = exam.days[iso] || (exam.days[iso] = {});
+      if (level) d.level = level; else delete d.level;
+      tidyDay(exam, iso);
+    });
+  }
+  function setDayNote(exam, iso, text) {
+    const d = exam.days[iso] || (exam.days[iso] = {});
+    const t = String(text || '').trim().slice(0, 60);
+    if (t) d.note = t; else delete d.note;
+    tidyDay(exam, iso);
+  }
+  /* holiday: true | false | null(기본값으로 되돌림) */
+  function setHoliday(exam, iso, value) {
+    const d = exam.days[iso] || (exam.days[iso] = {});
+    if (typeof value === 'boolean') d.holiday = value; else delete d.holiday;
+    if (typeof d.holiday === 'boolean' && d.holiday === !!HOLIDAYS[iso]) delete d.holiday;
+    tidyDay(exam, iso);
+  }
+
+  function tasksByDate(exam) {
+    const map = {};
+    exam.tasks.forEach((t) => { if (t.date) (map[t.date] || (map[t.date] = [])).push(t); });
+    return map;
+  }
+  function dayInfo(state, exam, iso, map) {
+    const list = (map || tasksByDate(exam))[iso] || [];
+    const level = levelOf(exam, iso);
+    const limit = state.limits[level];
+    const count = list.length;
+    const done = list.filter((t) => t.done).length;
+    return { iso, level, limit, count, done, over: count > limit, ratio: limit > 0 ? count / limit : count > 0 ? 2 : 0 };
+  }
+  function unplaced(exam) {
+    return exam.tasks.filter((t) => !t.date);
+  }
+  function moveTask(exam, id, iso) {
+    const t = exam.tasks.find((x) => x.id === id);
+    if (!t) return false;
+    if (iso === null) { t.date = null; return true; }
+    if (!prepDays(exam).includes(iso)) return false;
+    t.date = iso;
+    normalizeOrder(exam);
+    return true;
+  }
+  /* 순서 자동정리: 과목별로 배치된 회차를 날짜순으로 다시 번호 매긴다.
+     배치된 것들이 차지한 번호 칸만 날짜순으로 재배정하고, 미배치 회차의 번호는 건드리지 않는다. */
+  function normalizeOrder(exam) {
+    exam.subs.forEach((es) => {
+      ['s', 'r'].forEach((type) => {
+        const dated = exam.tasks.filter((t) => t.esId === es.id && t.type === type && t.date);
+        if (dated.length < 2) return;
+        const slots = dated.map((t) => t.seq).sort((a, b) => a - b);
+        dated.slice().sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.seq - b.seq))
+          .forEach((t, i) => { t.seq = slots[i]; });
+      });
+    });
+  }
+  function toggleDone(exam, id) {
+    const t = exam.tasks.find((x) => x.id === id);
+    if (!t) return null;
+    t.done = !t.done;
+    return t.done;
+  }
+  function overdue(exam, today) {
+    return exam.tasks.filter((t) => t.date && t.date < today && !t.done).sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.seq - b.seq));
+  }
+  function carryOver(exam, today) {
+    if (today > exam.end) return { moved: 0, target: null };
+    const target = today < exam.prepStart ? exam.prepStart : today;
+    const list = overdue(exam, target);
+    list.forEach((t) => { t.date = target; });
+    normalizeOrder(exam);
+    return { moved: list.length, target };
+  }
+
+  /* 시험 직전 리캡 일괄 추가: 과목별 미배치 리캡을 시험일 전 n일 안에 고르게 배치한다. */
+  function recapBatch(state, exam, n, today) {
+    const days = Math.max(1, clampInt(n, 1, 30));
+    const map = tasksByDate(exam);
+    let placed = 0, skipped = 0, hasRecap = false;
+    const subs = exam.subs.slice().sort((a, b) => ((a.examDate || exam.start) < (b.examDate || exam.start) ? -1 : 1));
+    subs.forEach((es) => {
+      const todo = exam.tasks.filter((t) => t.esId === es.id && t.type === 'r' && !t.date).sort((a, b) => a.seq - b.seq);
+      if (!todo.length) return;
+      hasRecap = true;
+      const end = es.examDate || exam.start;
+      let lo = addDays(end, -days);
+      if (lo < exam.prepStart) lo = exam.prepStart;
+      if (today && today > lo) lo = today;
+      const window = rangeDays(lo, addDays(end, -1));
+      if (!window.length) { skipped += todo.length; return; }
+      todo.forEach((t) => {
+        let best = null, bestScore = Infinity;
+        window.forEach((iso) => {
+          const level = levelOf(exam, iso);
+          const limit = Math.max(1, state.limits[level]);
+          const score = ((map[iso] || []).length + 1) / limit;
+          if (score < bestScore || score === bestScore) { best = iso; bestScore = score; }
+        });
+        t.date = best;
+        (map[best] || (map[best] = [])).push(t);
+        placed += 1;
+      });
+    });
+    normalizeOrder(exam);
+    return { placed, skipped, hasRecap };
+  }
+
+  function progress(exam) {
+    const total = exam.tasks.length;
+    return { total, done: exam.tasks.filter((t) => t.done).length };
+  }
+  function subProgress(exam, es) {
+    const list = exam.tasks.filter((t) => t.esId === es.id);
+    return { total: list.length, done: list.filter((t) => t.done).length, placed: list.filter((t) => t.date).length };
+  }
+
+  /* ---------- 정리와 검증 (저장소, 가져오기, 서버에서 읽은 값) ---------- */
+  const str = (v, max) => (typeof v === 'string' ? v.slice(0, max) : '');
+  function sanitizeState(raw) {
+    if (!raw || typeof raw !== 'object' || !Array.isArray(raw.exams) || !Array.isArray(raw.library)) return null;
+    const st = newState();
+    const legacy = !(Number(raw.v) >= 2);
+    const lvKey = (k) => (legacy ? LEGACY_LEVELS[k] : k);
+    const rawLimits = {};
+    if (raw.limits && typeof raw.limits === 'object') Object.keys(raw.limits).forEach((k) => { if (lvKey(k)) rawLimits[lvKey(k)] = raw.limits[k]; });
+    LEVEL_KEYS.forEach((k) => { st.limits[k] = clampInt(rawLimits[k] != null ? rawLimits[k] : DEFAULT_LIMITS[k], 0, 20); });
+    if (Number(raw.v) === 2 && st.limits.calm === 5) st.limits.calm = DEFAULT_LIMITS.calm; /* v2 기본값 5였던 한가한 날 한도를 상향 */
+    st.recapDays = clampInt(raw.recapDays != null ? raw.recapDays : 7, 1, 30);
+    st.updatedAt = Number(raw.updatedAt) || 0;
+    st.week = cleanWeek(raw.week);
+    st.defPlan = cleanPlan(raw.defPlan);
+    const libIds = new Set();
+    raw.library.forEach((s) => {
+      if (!s || typeof s.id !== 'string' || libIds.has(s.id)) return;
+      const name = normName(str(s.name, 40));
+      if (!name || st.library.some((x) => nameKey(x.name) === nameKey(name))) return;
+      libIds.add(s.id);
+      st.library.push({ id: s.id.slice(0, 40), name, color: /^#[0-9a-f]{6}$/i.test(s.color) ? s.color : PALETTE[st.library.length % PALETTE.length] });
+    });
+    const examIds = new Set();
+    raw.exams.forEach((e) => {
+      if (!e || typeof e.id !== 'string' || examIds.has(e.id)) return;
+      if (!isISO(e.start) || !isISO(e.end) || !isISO(e.prepStart) || e.end < e.start || e.prepStart > e.end) return;
+      if (diffDays(e.prepStart, e.end) + 1 > MAX_DAYS) return;
+      const name = normName(str(e.name, 60));
+      if (!name) return;
+      examIds.add(e.id);
+      const ex = { id: e.id.slice(0, 40), name, start: e.start, end: e.end, prepStart: e.prepStart, subs: [], tasks: [], days: {}, week: cleanWeek(e.week) };
+      const eDays = examDays(ex);
+      const esIds = new Set();
+      (Array.isArray(e.subs) ? e.subs : []).forEach((s) => {
+        if (!s || typeof s.id !== 'string' || esIds.has(s.id) || !libIds.has(s.subjectId)) return;
+        if (ex.subs.some((x) => x.subjectId === s.subjectId)) return;
+        esIds.add(s.id);
+        const links = [];
+        (Array.isArray(s.links) ? s.links : []).slice(0, 20).forEach((l) => {
+          const href = l && normalizeLink(l.url);
+          if (href) links.push({ label: str(l.label, 60), url: href });
+        });
+        const p = s.plan || {};
+        ex.subs.push({
+          id: s.id.slice(0, 40), subjectId: s.subjectId, examDate: eDays.includes(s.examDate) ? s.examDate : null,
+          range: str(s.range, MAX_TEXT), comment: str(s.comment, MAX_TEXT), links,
+          plan: { n: clampInt(p.n, 0, MAX_COUNT), m: clampInt(p.m, 0, MAX_COUNT), r: clampInt(p.r, 0, MAX_COUNT) },
+        });
+      });
+      const pDays = new Set(prepDays(ex));
+      const taskIds = new Set();
+      (Array.isArray(e.tasks) ? e.tasks : []).forEach((t) => {
+        if (!t || typeof t.id !== 'string' || taskIds.has(t.id) || !esIds.has(t.esId)) return;
+        if (t.type !== 's' && t.type !== 'r') return;
+        taskIds.add(t.id);
+        ex.tasks.push({ id: t.id.slice(0, 40), esId: t.esId, type: t.type, seq: clampInt(t.seq, 1, MAX_COUNT * 2), date: pDays.has(t.date) ? t.date : null, done: !!t.done });
+      });
+      if (e.days && typeof e.days === 'object') {
+        Object.keys(e.days).forEach((k) => {
+          if (!pDays.has(k) || !e.days[k] || typeof e.days[k] !== 'object') return;
+          const d = e.days[k], out = {};
+          const lv = lvKey(d.level);
+          if (LEVEL_KEYS.includes(lv)) out.level = lv;
+          const note = str(d.note, 60).trim();
+          if (note) out.note = note;
+          if (typeof d.holiday === 'boolean') out.holiday = d.holiday;
+          if (Object.keys(out).length) ex.days[k] = out;
+        });
+      }
+      ex.subs.forEach((es) => syncTasks(ex, es)); // 개수가 어긋난 저장본을 분량에 맞춘다
+      st.exams.push(ex);
+    });
+    st.activeId = st.exams.some((e) => e.id === raw.activeId) ? raw.activeId : st.exams.length ? st.exams[0].id : null;
+    return st;
+  }
+
+  function exportPayload(state) {
+    return { app: 'exam-planner', version: 1, exportedAt: new Date().toISOString(), state };
+  }
+  /* 가져온 시험을 합친다. 같은 id의 시험은 건너뛴다. */
+  function importMerge(state, payload) {
+    if (!payload || payload.app !== 'exam-planner') return { error: 'format' };
+    const incoming = sanitizeState(payload.state);
+    if (!incoming) return { error: 'format' };
+    const idMap = {};
+    incoming.library.forEach((s) => {
+      const mine = findSubject(state, s.name);
+      if (mine) idMap[s.id] = mine.id;
+      else {
+        const added = { id: state.library.some((x) => x.id === s.id) ? uid() : s.id, name: s.name, color: s.color };
+        state.library.push(added);
+        idMap[s.id] = added.id;
+      }
+    });
+    let added = 0, dup = 0;
+    incoming.exams.forEach((e) => {
+      if (state.exams.some((x) => x.id === e.id)) { dup += 1; return; }
+      e.subs.forEach((s) => { s.subjectId = idMap[s.subjectId]; });
+      state.exams.push(e);
+      added += 1;
+    });
+    if (!state.activeId && state.exams.length) state.activeId = state.exams[0].id;
+    return { added, dup, skipped: 0 };
+  }
+
+  return {
+    addSubs, cleanPlan, cleanWeek, LEVELS, LEVEL_KEYS, DEFAULT_LIMITS, PALETTE, HOLIDAYS, DEFAULT_PLAN, MAX_COUNT,
+    parseISO, toISO, isISO, addDays, diffDays, weekday, rangeDays, todayISO, uid, normName, nameKey,
+    newState, validateExamFields, newExam, updateExamFields, prepDays, examDays, getExam,
+    findSubject, ensureSubject, renameSubject, subjectOf,
+    addSub, removeSub, setSubDate, normalizeLink, planTotals, syncTasks, previewPlanChange, setPlan, taskLabel, taskKind,
+    isHoliday, holidayName, defaultLevel, levelOf, setDayLevel, setDayNote, setHoliday,
+    tasksByDate, dayInfo, unplaced, moveTask, normalizeOrder, toggleDone, overdue, carryOver, recapBatch, progress, subProgress,
+    sanitizeState, exportPayload, importMerge,
+  };
+})();
+
+</script>
+<script>
+'use strict';
+/* 화면과 저장. 로직은 Planner(core.js)에 있다. */
+const P = Planner;
+
+/* ---------- 화면 문구 (한 곳에 모은다) ---------- */
+const S = {
+  tabs: { exam: '시험 일정', board: '준비 계획', today: '오늘', print: '달력' },
+  editMode: '편집', levelTitle: '바쁨 정도', levelDefault: '기본값으로', levelPer: (n) => '권장 ' + n + '개', levelChip: (d, l) => d + ' 바쁨 정도 ' + l + ', 변경',
+  memo: '메모', memoPh: '학원 일정 등', memoClear: '지우기', memoDone: '완료',
+  printModeLabel: '보기 형식', weekTotal: (n) => '할일 ' + n, printModeAll: '한 장 계획표', printModeTwo: '2주 달력', printModeOne: '1주 달력', printBtn: '인쇄', printSave: 'HTML로 저장', printSaved: 'HTML 파일로 저장했습니다. 파일을 열어 인쇄하세요.', printFail: '파일을 저장하지 못했습니다.',
+  legendStudy: '교재·자습서·핸드아웃', legendWork: '문제집', legendRecap: '리캡', legendLevel: '바쁨 정도', examLine: (n, names) => '시험 ' + n + '일차 ' + names, printNone: '인쇄할 시험이 없습니다.',
+  szTip: (n, m, r) => '교재 ' + n + '회, 문제집 ' + m + '회, 리캡 ' + r + '회',
+  limitsHint: '날짜별 권장 할일 수',
+  newExam: '새 시험', createExam: '시험 만들기', cancel: '취소', del: '삭제', close: '닫기',
+  fName: '시험 이름', fStart: '시작일', fEnd: '종료일', fPrep: '준비 시작일', namePh: '예: 2학기 기말고사',
+  examDeleteConfirm: '이 시험과 배치한 할일이 모두 삭제됩니다. 삭제한 시험은 복구할 수 없습니다.',
+  examSchedule: '일차별 시험 과목', undated: '날짜 미정', addSub: '과목 추가', addSubPh: '과목 (쉼표로 여러 개)', addSubDone: '추가', addedN: (a, d) => a + '과목을 추가했습니다.' + (d ? ' 이미 있는 ' + d + '과목은 건너뛰었습니다.' : ''), quickAdd: '빠른 추가', prepWeeks: (n) => n + '주 전', weekTitle: '요일별 기본 바쁨 정도', weekAuto: '기본', defPlanTitle: '새 과목 기본 분량',
+  vault: '보관함', vaultNone: '배치할 회차가 없습니다.', vaultNoSubs: '과목을 먼저 등록해 주세요.', goExam: '시험 일정으로',
+  vaultCount: (n) => '보관함 ' + n + '개',
+  selWeekend: '주말·공휴일', selEmpty: '비어 있는 날', vaultTitle: '배치 대기', selClear: '선택 해제', selCount: (n) => n + '일 선택', levelReset: '기본값',
+  recapOpen: '직전 리캡 추가', recapFrom: '시험 전', recapDays: '일', recapRun: '추가', recapLeft: (n) => '미배치 리캡 ' + n + '개',
+  recapNone: '배치할 리캡 회차가 없습니다. 과목에서 리캡 횟수를 정해 주세요.',
+  recapDone: (n) => '리캡 ' + n + '개를 배치했습니다.',
+  recapSkip: (n) => '남은 날이 없어 ' + n + '개는 보관함에 남았습니다.',
+  overdue: (n) => '밀린 할일 ' + n + '개', carry: '오늘로 이월', jumpToday: '오늘',
+  carried: (n, d) => '밀린 할일 ' + n + '개를 ' + d + '로 옮겼습니다.',
+  overLimit: (d, n) => d + ' 할일이 권장 개수(' + n + '개)를 넘었습니다.',
+  noteLabel: '메모', notePh: '메모 (학원 등)', holidayOn: '휴일로 표시', holidayOff: '휴일 표시 해제',
+  today: '오늘', examDayN: (n) => '시험 ' + n + '일차', dayN: (n) => n + '일차',
+  pickTitle: '날짜 선택', toVault: '보관함으로', moveDate: '날짜 옮기기', done: '완료',
+  todayEmpty: '오늘 배치된 할일이 없습니다.', todayOut: (d) => '준비 기간은 ' + d + '부터입니다.', goBoard: '준비 계획으로',
+  upcoming: '다음 할일', subjects: '과목별 진행', noExam: '시험을 만들면 과목과 할일을 배치할 수 있습니다.',
+  subTitle: '과목 정보', subName: '과목명', subColor: '색', subDate: '시험 날짜', subRange: '시험 범위', subComment: '코멘트', subLinks: '자료 링크',
+  linkLabel: '이름', linkUrl: '주소', linkAdd: '추가', linkBad: '올바른 주소를 입력해 주세요. (http 또는 https)',
+  planTitle: '분량', planN: '교재·자습서·핸드아웃', planM: '문제집', planR: '리캡',
+  planSum: (n, m, r, p, t) => '본 학습 ' + (n + m) + '회, 리캡 ' + r + '회 · 배치 ' + p + '/' + t,
+  planCut: (k) => '분량을 줄이면 배치한 할일 ' + k + '개가 삭제됩니다.', cut: '줄이기',
+  subDel: '이 시험에서 삭제', subDelConfirm: (k) => '이 시험에서 과목과 배치한 할일 ' + k + '개가 삭제됩니다.',
+  settings: '설정', data: '데이터', limitsTitle: '날짜별 권장 할일 수', recapDefault: '직전 리캡 기본 일수', themeTitle: '화면 색', themes: { auto: '자동', light: '밝게', dark: '어둡게' },
+  export: '내보내기', exportFile: 'JSON 파일 저장', exportCopy: 'JSON 복사', copied: '복사했습니다.', copyFail: '복사하지 못했습니다. 파일로 저장해 주세요.',
+  exported: '파일로 내보냈습니다.', exportFail: '파일을 저장하지 못했습니다. JSON 복사를 이용해 주세요.',
+  import: '가져오기', importFile: '파일 열기', importPaste: '내보낸 JSON을 붙여넣거나 파일을 놓으세요', importRun: '가져오기', dropOpen: '놓아서 열기',
+  importBad: '가져올 수 없는 파일입니다. 이 앱에서 내보낸 JSON 파일을 선택해 주세요.',
+  importRes: (a, d, s) => '추가 ' + a + ', 중복 ' + d + ', 제외 ' + s, importMulti: '한 번에 파일 하나만 가져옵니다. 나머지는 제외했습니다.',
+  syncLocal: '이 브라우저에만 저장됨', syncLocalTip: '브라우저 데이터를 지우면 사라집니다. 데이터에서 내보내기로 백업할 수 있습니다.',
+  syncing: '동기화 중…', synced: '동기화됨',
+  syncErr: '동기화하지 못했습니다', syncErrTip: '변경 내용은 이 브라우저에 저장됩니다. 연결되면 다시 시도합니다.',
+  syncQuota: '서버에 저장하지 못했습니다', syncQuotaTip: '용량을 넘었습니다. 지난 시험을 삭제하면 줄일 수 있습니다. 변경 내용은 이 브라우저에 저장됩니다.',
+  saveFail: '이 브라우저에 저장하지 못했습니다', saveFailTip: '저장 공간이 부족하거나 막혀 있습니다. 데이터에서 내보내기로 백업해 주세요.',
+  remainDays: (n) => (n > 0 ? '시험 시작까지 ' + n + '일' : n === 0 ? '오늘 시험 시작' : ''), duringExam: '시험 기간', afterExam: '시험이 끝났습니다.',
+};
+const WD = ['일', '월', '화', '수', '목', '금', '토'];
+const fmtMD = (iso) => +iso.slice(5, 7) + '/' + +iso.slice(8, 10);
+const fmtFull = (iso) => fmtMD(iso) + '(' + WD[P.weekday(iso)] + ')';
+
+/* ---------- 작은 도구 ---------- */
+const $ = (sel) => document.querySelector(sel);
+function el(tag, props, ...kids) {
+  const n = document.createElement(tag);
+  if (props) {
+    for (const [k, v] of Object.entries(props)) {
+      if (v == null || v === false) continue;
+      if (k === 'class') n.className = v;
+      else if (k === 'style') n.style.cssText = v;
+      else if (k === 'text') n.textContent = v;
+      else if (k === 'value' || k === 'checked' || k === 'disabled' || k === 'selected') n[k] = v;
+      else if (k === 'dataset') Object.assign(n.dataset, v);
+      else if (k.startsWith('on')) n.addEventListener(k.slice(2).toLowerCase(), v);
+      else if (v === true) n.setAttribute(k, '');
+      else n.setAttribute(k, v);
+    }
+  }
+  for (const kid of kids.flat(Infinity)) {
+    if (kid == null || kid === false) continue;
+    n.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+  }
+  return n;
+}
+const ico = (name, cls) => { const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('aria-hidden', 'true'); s.setAttribute('class', 'i' + (cls ? ' ' + cls : '')); s.innerHTML = ICONS[name]; return s; };
+const iconBtn = (name, label, onClick, extra) => el('button', Object.assign({ type: 'button', class: 'icon', 'aria-label': label, title: label, onClick }, extra), ico(name));
+const KIND_ICON = { '교재': 'book-open', '문제집': 'pen-line', '리캡': 'rotate-ccw' };
+const levelLabel = (k) => (P.LEVELS.find((l) => l.key === k) || { label: '' }).label;
+const isNarrow = () => !!(window.matchMedia && window.matchMedia('(max-width: 720px)').matches);
+function meter(level) {
+  const idx = P.LEVEL_KEYS.indexOf(level);
+  return el('span', { class: 'meter', 'data-lv': level }, [0, 1, 2, 3, 4].map((i) => el('i', { dataset: i <= idx ? { on: '' } : {} })));
+}
+function szNode(plan) {
+  return el('span', { class: 'sz', role: 'img', 'aria-label': S.szTip(plan.n, plan.m, plan.r), title: S.szTip(plan.n, plan.m, plan.r) },
+    [['book-open', plan.n], ['pen-line', plan.m], ['rotate-ccw', plan.r]].map(([ic, n]) => el('span', null, ico(ic), n)));
+}
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const clone = (o) => JSON.parse(JSON.stringify(o));
+
+/* ---------- 상태 ---------- */
+let state = P.newState();
+const ui = {
+  tab: 'board', creating: false, form: { name: '', start: '', end: '', prepStart: '', prepTouched: false }, formError: '', examFormError: '',
+  selected: new Set(), day: null, anchor: null, edit: false, vaultOpen: false, recapOpen: false, delExam: false, drag: null, focusKey: null, scrollToday: false,
+  theme: 'auto', localFail: false, subId: null, pendingPlan: null, delSub: false, linkError: '', importMsg: '', importRaw: '',
+};
+const cur = () => P.getExam(state, state.activeId);
+
+/* 화면 설정(기기별): 탭, 테마 */
+const UI_KEY = 'examPlanner.ui';
+function loadPrefs() {
+  try {
+    const p = JSON.parse(localStorage.getItem(UI_KEY) || '{}');
+    if (['exam', 'board', 'today', 'print'].includes(p.tab)) ui.tab = p.tab; else ui.tab = null;
+    if (['auto', 'light', 'dark'].includes(p.theme)) ui.theme = p.theme;
+  } catch (e) { ui.tab = null; }
+}
+function savePrefs() {
+  try { localStorage.setItem(UI_KEY, JSON.stringify({ tab: ui.tab, theme: ui.theme })); } catch (e) { /* 저장소를 쓸 수 없어도 동작한다 */ }
+}
+function applyTheme() { document.documentElement.dataset.theme = ui.theme; }
+
+/* ---------- 저장: IndexedDB, localStorage, 메모리 순 ---------- */
+const LS_KEY = 'examPlanner.state.v1';
+let memoryCopy = null;
+const idb = {
+  db: null,
+  open() {
+    return new Promise((res, rej) => {
+      try {
+        const r = indexedDB.open('examPlanner', 1);
+        r.onupgradeneeded = () => r.result.createObjectStore('kv');
+        r.onsuccess = () => res(r.result);
+        r.onerror = () => rej(r.error);
+        r.onblocked = () => rej(new Error('blocked'));
+      } catch (e) { rej(e); }
+    });
+  },
+  async get(k) {
+    const db = this.db || (this.db = await this.open());
+    return new Promise((res, rej) => { const q = db.transaction('kv').objectStore('kv').get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); });
+  },
+  async set(k, v) {
+    const db = this.db || (this.db = await this.open());
+    return new Promise((res, rej) => { const tx = db.transaction('kv', 'readwrite'); tx.objectStore('kv').put(v, k); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error); });
+  },
+};
+const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
+async function loadLocal() {
+  try { const v = await withTimeout(idb.get('state'), 2000); if (v) return v; } catch (e) { /* 다음 저장소로 */ }
+  try { const s = localStorage.getItem(LS_KEY); if (s) return JSON.parse(s); } catch (e) { /* 다음 저장소로 */ }
+  return memoryCopy;
+}
+async function saveLocal(obj) {
+  memoryCopy = obj;
+  try { await withTimeout(idb.set('state', obj), 4000); return true; } catch (e) { /* 다음 저장소로 */ }
+  try { localStorage.setItem(LS_KEY, JSON.stringify(obj)); return true; } catch (e) { return false; }
+}
+let localTimer = null;
+function scheduleLocalSave() {
+  clearTimeout(localTimer);
+  localTimer = setTimeout(flushLocal, 300);
+}
+async function flushLocal() {
+  clearTimeout(localTimer);
+  localTimer = null;
+  const ok = await saveLocal(clone(state));
+  if (ok === ui.localFail) { ui.localFail = !ok; renderHeader(); }
+}
+
+/* ---------- 서버 동기화 (로그인한 claude.ai 보기에서만) ---------- */
+const remote = { ref: null, status: 'local', loaded: false, pushing: false, again: false, timer: null, err: '' };
+function setRemote(s, err) { remote.status = s; remote.err = err || ''; renderHeader(); }
+async function initRemote() {
+  if (!window.claude || typeof window.claude.use !== 'function') return;
+  try {
+    const [db, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
+    if (!db || !user) return;
+    const id = await user.id();
+    if (!id) return;
+    remote.ref = db.collection('data/users/' + id).doc('planner');
+    setRemote('syncing');
+    remote.ref.onSnapshot(onRemoteSnap, (e) => setRemote('error', e && e.code));
+  } catch (e) { /* 서버 없이 이 기기 저장만 쓴다 */ }
+}
+function hasContent() { return state.exams.length > 0 || state.library.length > 0; }
+function onRemoteSnap(snap) {
+  const meta = snap.metadata || {};
+  if (meta.hasPendingWrites) return;
+  const definitive = !meta.fromCache;
+  const data = snap.exists ? snap.data() : null;
+  if (!data) {
+    if (definitive) { remote.loaded = true; if (hasContent()) schedulePush(0); else setRemote('synced'); }
+    return;
+  }
+  const incoming = P.sanitizeState(data.state);
+  const ts = Number(data.updatedAt) || 0;
+  if (definitive) remote.loaded = true;
+  if (!incoming) { if (definitive) schedulePush(0); return; }
+  if (ts > state.updatedAt) adoptRemote(incoming, ts);
+  else if (definitive && ts < state.updatedAt) schedulePush(0);
+  else if (definitive) setRemote('synced');
+}
+function adoptRemote(incoming, ts) {
+  state = incoming;
+  state.updatedAt = ts;
+  scheduleLocalSave();
+  ui.selected.clear();
+  if (ui.subId && !(cur() && cur().subs.some((s) => s.id === ui.subId))) closePanel();
+  renderAll();
+  refreshPanel();
+  setRemote('synced');
+}
+function schedulePush(delay) {
+  if (!remote.ref) return;
+  clearTimeout(remote.timer);
+  remote.timer = setTimeout(pushRemote, delay == null ? 800 : delay);
+}
+async function pushRemote() {
+  if (!remote.ref || !remote.loaded) return;
+  if (remote.pushing) { remote.again = true; return; }
+  remote.pushing = true;
+  setRemote('syncing');
+  try {
+    const body = { updatedAt: state.updatedAt, state: clone(state) };
+    try { await remote.ref.set(body); } catch (e) {
+      if (e && e.code === 'unavailable') { await sleep(1500); await remote.ref.set(body); } else throw e;
+    }
+    setRemote('synced');
+  } catch (e) {
+    setRemote('error', e && e.code);
+  } finally {
+    remote.pushing = false;
+    if (remote.again) { remote.again = false; schedulePush(0); }
+  }
+}
+
+/* ---------- 변경 반영 ---------- */
+function commit(opts) {
+  const o = Object.assign({ render: true, panel: false }, opts);
+  state.updatedAt = Math.max(Date.now(), state.updatedAt + 1);
+  scheduleLocalSave();
+  if (remote.ref && remote.loaded) schedulePush();
+  if (o.render) renderAll();
+  if (o.panel || panel.kind === 'day') refreshPanel();
+}
+let toastTimer = null;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.hidden = true; }, 4200);
+}
+
+/* ---------- 팝오버 ---------- */
+const pop = { el: null, anchor: null, onClose: null };
+function openPopover(anchor, title, build, onClose) {
+  if (pop.anchor === anchor) { closePopover(true); return; }
+  closePopover();
+  const p = el('div', { class: 'pop', role: 'dialog', 'aria-label': title }, el('div', { class: 'ph', text: title }), build());
+  document.body.append(p);
+  pop.el = p; pop.anchor = anchor; pop.onClose = onClose || null;
+  anchor.setAttribute('aria-expanded', 'true');
+  if (window.innerWidth > 720) {
+    const r = anchor.getBoundingClientRect();
+    const w = p.offsetWidth, h = p.offsetHeight;
+    const left = Math.min(Math.max(8, r.left), Math.max(8, window.innerWidth - w - 8));
+    let top = r.bottom + 6;
+    if (top + h > window.innerHeight - 8) top = Math.max(8, r.top - h - 6);
+    p.style.left = left + 'px'; p.style.top = top + 'px';
+  }
+  const f = p.querySelector('[data-autofocus]') || p.querySelector('button');
+  if (f) f.focus();
+}
+function closePopover(restore) {
+  if (!pop.el) return;
+  const p = pop.el, anchor = pop.anchor, cb = pop.onClose;
+  pop.el = null; pop.anchor = null; pop.onClose = null;
+  p.remove();
+  if (anchor && anchor.isConnected) { anchor.setAttribute('aria-expanded', 'false'); if (restore) anchor.focus(); }
+  if (cb) cb();
+}
+
+/* ---------- 패널 (서랍, 시트) ---------- */
+const panel = { build: null, opener: null, kind: null };
+function openPanel(kind, title, build, opener) {
+  closePopover();
+  closePanel(true);
+  panel.build = build; panel.kind = kind; panel.opener = opener || null;
+  const p = $('#panel');
+  p.className = kind === 'picker' || kind === 'day' ? 'sheet' : 'drawer';
+  $('#panelTitle').textContent = title;
+  $('#scrim').hidden = false; p.hidden = false;
+  $('#app').inert = true;
+  if (opener && opener.hasAttribute('aria-expanded')) opener.setAttribute('aria-expanded', 'true');
+  refreshPanel();
+  const f = $('#panelBody').querySelector('[data-autofocus]') || $('#panelClose');
+  f.focus();
+}
+function refreshPanel() {
+  if (!panel.build || $('#panel').hidden) return;
+  const body = $('#panelBody');
+  const y = body.scrollTop;
+  body.replaceChildren(...[].concat(panel.build()));
+  body.scrollTop = y;
+}
+function closePanel(silent) {
+  if ($('#panel').hidden) return;
+  $('#panel').hidden = true; $('#scrim').hidden = true;
+  $('#app').inert = false;
+  const op = panel.opener;
+  panel.build = null; panel.kind = null; panel.opener = null;
+  if (!silent) { ui.subId = null; ui.pendingPlan = null; ui.delSub = false; ui.linkError = ''; ui.importMsg = ''; }
+  if (op && op.isConnected) {
+    if (op.hasAttribute('aria-controls')) op.setAttribute('aria-expanded', 'false');
+    if (!silent) op.focus();
+  }
+}
+
+/* ---------- 머리글 ---------- */
+function renderHeader() {
+  const ex = cur();
+  const pick = ex || state.exams.length
+    ? el('select', { class: 'exam-pick', 'aria-label': '시험 선택', onChange: (e) => { state.activeId = e.target.value; ui.selected.clear(); ui.creating = false; ui.delExam = false; ui.scrollToday = true; commit(); } },
+      state.exams.map((x) => el('option', { value: x.id, selected: x.id === state.activeId, text: x.name })))
+    : null;
+  let st = ['local', S.syncLocal, S.syncLocalTip];
+  if (ui.localFail) st = ['error', S.saveFail, S.saveFailTip];
+  else if (remote.ref) {
+    if (remote.status === 'error') st = remote.err === 'quota_exceeded' || remote.err === 'invalid_argument' ? ['error', S.syncQuota, S.syncQuotaTip] : ['error', S.syncErr, S.syncErrTip];
+    else st = [remote.status, remote.status === 'syncing' ? S.syncing : S.synced, ''];
+  }
+  const pr = ex ? P.progress(ex) : null;
+  const top = $('#top');
+  top.replaceChildren(el('div', { class: 'wrap' },
+    el('div', { class: 'top-row' },
+      pick,
+      el('button', { type: 'button', class: 'btn', onClick: openCreate }, ico('plus'), S.newExam),
+      el('span', { class: 'spacer' }),
+      pr && pr.total ? el('div', { class: 'hprog', title: '전체 진행률' }, el('div', { class: 'bar' }, el('i', { style: 'width:' + Math.round((pr.done / pr.total) * 100) + '%' })), el('span', { class: 'mono', text: pr.done + '/' + pr.total })) : null,
+      st[0] === 'local' ? null : el('span', { class: 'sync', 'data-s': st[0], title: st[2], text: st[1] }),
+      iconBtn('settings', S.settings, (e) => openSettings(e.currentTarget), { 'aria-controls': 'panel', 'aria-expanded': 'false' }),
+      iconBtn('database', S.data, (e) => openData(e.currentTarget), { 'aria-controls': 'panel', 'aria-expanded': 'false' })),
+    ex && !ui.creating ? el('div', { class: 'tabs', role: 'tablist' }, tabOrder().map((k) =>
+      el('button', { type: 'button', class: 'tab', role: 'tab', 'aria-selected': String(ui.tab === k), onClick: () => setTab(k) }, ico(TAB_ICON[k]), S.tabs[k]))) : null));
+}
+const TAB_ICON = { exam: 'calendar-range', board: 'list-checks', today: 'sun', print: 'calendar-days' };
+const tabOrder = () => (isNarrow() ? ['today', 'board', 'exam', 'print'] : ['exam', 'board', 'today', 'print']);
+function setTab(k) {
+  closePopover();
+  if (k !== 'board' && ui.edit) { ui.edit = false; ui.selected.clear(); }
+  ui.tab = k; savePrefs();
+  if (k === 'board') ui.scrollToday = true;
+  renderAll();
+  window.scrollTo(0, 0);
+}
+function openCreate() {
+  ui.creating = true; ui.formError = '';
+  ui.form = { name: '', start: '', end: '', prepStart: '', prepTouched: false };
+  renderAll(); window.scrollTo(0, 0);
+}
+
+/* ---------- 움직임: 이동 애니메이션과 드래그 ---------- */
+const MOTION = () => typeof Element !== 'undefined' && !!Element.prototype.animate && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+const SPRING = 'cubic-bezier(.34,1.56,.64,1)';
+const EASE_OUT = 'cubic-bezier(.22,.9,.3,1)';
+let lastView = '';
+function snapFlip() {
+  const m = new Map();
+  if (!MOTION()) return m;
+  document.querySelectorAll('#main [data-flip]').forEach((n) => {
+    const r = n.getBoundingClientRect();
+    if (!r.width) return;
+    if (!m.has(n.dataset.flip)) m.set(n.dataset.flip, []);
+    m.get(n.dataset.flip).push(r);
+  });
+  return m;
+}
+function flyNode(n, r, dx, dy) {
+  const dist = Math.hypot(dx, dy);
+  const g = n.cloneNode(true);
+  g.removeAttribute('data-flip'); g.setAttribute('aria-hidden', 'true');
+  Object.assign(g.style, { position: 'fixed', left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px', margin: '0', zIndex: 'var(--z-drag)', pointerEvents: 'none', boxSizing: 'border-box' });
+  document.body.append(g);
+  n.style.visibility = 'hidden';
+  const lift = Math.min(26, dist * 0.08);
+  const a = g.animate([
+    { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(1.08) rotate(-4deg)', boxShadow: '0 14px 30px rgba(31,30,29,.30)' },
+    { transform: 'translate(' + dx * 0.22 + 'px,' + (dy * 0.22 - lift) + 'px) scale(1.1) rotate(2deg)', boxShadow: '0 18px 34px rgba(31,30,29,.24)', offset: 0.62 },
+    { transform: 'none', boxShadow: '0 0 0 rgba(31,30,29,0)' }], { duration: Math.min(640, 320 + dist * 0.35), easing: EASE_OUT });
+  const done = () => { g.remove(); n.style.visibility = ''; if (n.isConnected) n.animate([{ transform: 'scale(1.14)' }, { transform: 'none' }], { duration: 300, easing: SPRING }); };
+  a.onfinish = done; a.oncancel = done;
+}
+function playFlip(old) {
+  const view = (ui.creating ? 'create' : ui.tab) + ':' + (state.activeId || '');
+  const changed = view !== lastView; lastView = view;
+  const drop = ui.dropAt; ui.dropAt = null;
+  const landed = ui.landed; ui.landed = null;
+  if (!MOTION()) return;
+  if (changed) {
+    const wrap = document.querySelector('#main .wrap');
+    if (wrap) wrap.animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 280, easing: EASE_OUT });
+    return;
+  }
+  document.querySelectorAll('#main [data-flip]').forEach((n) => {
+    const r = n.getBoundingClientRect();
+    if (!r.width) return;
+    const key = n.dataset.flip;
+    const list = old.get(key);
+    const isDrop = drop && drop.key === key;
+    let from = null;
+    if (list) {
+      let best = Infinity;
+      list.forEach((o) => { const d = Math.hypot(o.left - r.left, o.top - r.top); if (d < best) { best = d; from = o; } });
+      if (best < 1) return;
+    }
+    if (isDrop && !n.closest('.side')) from = { left: drop.x - r.width / 2, top: drop.y - r.height / 2 };
+    if (!from) { n.animate([{ opacity: 0, transform: 'scale(.6)' }, { opacity: 1, transform: 'none' }], { duration: 340, easing: SPRING }); return; }
+    const dx = from.left - r.left, dy = from.top - r.top;
+    if (isDrop) flyNode(n, r, dx, dy);
+    else n.animate([{ transform: 'translate(' + dx + 'px,' + dy + 'px)' }, { transform: 'none' }], { duration: 300, easing: EASE_OUT });
+  });
+  const t = landed && document.querySelector(landed);
+  if (t) t.animate([{ boxShadow: '0 0 0 0 rgba(217,119,87,.6)' }, { boxShadow: '0 0 0 14px rgba(217,119,87,0)' }], { duration: 560, easing: 'ease-out' });
+}
+function dragStart(e, node, payload) {
+  ui.drag = payload;
+  e.dataTransfer.setData('text/plain', payload.kind + ':' + payload.id);
+  e.dataTransfer.effectAllowed = 'move';
+  document.body.dataset.drag = payload.kind;
+  if (MOTION() && e.dataTransfer.setDragImage) {
+    const r = node.getBoundingClientRect();
+    const g = node.cloneNode(true);
+    g.removeAttribute('data-flip'); g.style.width = r.width + 'px';
+    const box = el('div', { class: 'dragimg', 'aria-hidden': 'true' }, g);
+    document.body.append(box);
+    e.dataTransfer.setDragImage(box, e.clientX - r.left + 18, e.clientY - r.top + 18);
+    setTimeout(() => box.remove(), 0);
+  }
+  setTimeout(() => { node.dataset.dragging = ''; }, 0);
+}
+function dragEnd(node) { ui.drag = null; delete document.body.dataset.drag; if (node) setTimeout(() => { delete node.dataset.dragging; }, 0); }
+
+function renderAll() {
+  const y = window.scrollY;
+  const old = snapFlip();
+  renderHeader();
+  renderMain();
+  if (ui.focusKey) {
+    const t = document.querySelector('[data-fk="' + ui.focusKey + '"]');
+    if (t) t.focus();
+    ui.focusKey = null;
+  }
+  if (ui.scrollToday) {
+    ui.scrollToday = false;
+    const t = document.querySelector('.day[data-today]');
+    if (t) { t.scrollIntoView({ block: 'center' }); playFlip(old); return; }
+  }
+  window.scrollTo(0, y);
+  playFlip(old);
+}
+function renderMain() {
+  const m = $('#main');
+  const ex = cur();
+  if (!ex || ui.creating) { m.replaceChildren(el('div', { class: 'wrap' }, createForm())); return; }
+  let body;
+  if (ui.tab === 'exam') body = examTab(ex);
+  else if (ui.tab === 'today') body = todayTab(ex);
+  else if (ui.tab === 'print') body = printTab(ex);
+  else body = boardTab(ex);
+  m.replaceChildren(el('div', { class: 'wrap' }, body));
+}
+
+/* ---------- 시험 만들기 ---------- */
+function createForm() {
+  const f = ui.form;
+  const nameIn = el('input', { type: 'text', value: f.name, placeholder: S.namePh, maxlength: '60', 'data-autofocus': '', autocomplete: 'off', onInput: (e) => { f.name = e.target.value; } });
+  const startIn = el('input', { type: 'date', value: f.start, onChange: (e) => { f.start = e.target.value; if (!P.isISO(f.start)) return;
+    if (!f.prepTouched) { f.prepStart = P.addDays(f.start, -28); prepIn.value = f.prepStart; }
+    if (!P.isISO(f.end) || f.end < f.start) { f.end = P.addDays(f.start, 3); endIn.value = f.end; } } });
+  const endIn = el('input', { type: 'date', value: f.end, onChange: (e) => { f.end = e.target.value; } });
+  const prepIn = el('input', { type: 'date', value: f.prepStart, onChange: (e) => { f.prepStart = e.target.value; f.prepTouched = true; } });
+  const err = el('p', { class: 'err', hidden: !ui.formError, text: ui.formError });
+  const form = el('form', { class: 'card stack', style: 'max-width:640px;margin:0 auto', onSubmit: (e) => {
+    e.preventDefault();
+    const r = P.newExam({ name: f.name, start: f.start, end: f.end, prepStart: f.prepStart });
+    if (r.error) { ui.formError = r.error; err.textContent = r.error; err.hidden = false; return; }
+    r.exam.week = P.cleanWeek(state.week);
+    state.exams.push(r.exam); state.activeId = r.exam.id; ui.creating = false; ui.tab = 'exam'; savePrefs();
+    ui.focusKey = 'add-undated'; commit();
+  } },
+    el('h2', { class: 'sec', text: S.newExam }),
+    el('label', { class: 'f' }, el('span', { text: S.fName }), nameIn),
+    el('div', { class: 'grid4', style: 'grid-template-columns:repeat(auto-fit,minmax(150px,1fr))' },
+      el('label', { class: 'f' }, el('span', { text: S.fStart }), startIn),
+      el('label', { class: 'f' }, el('span', { text: S.fEnd }), endIn),
+      el('label', { class: 'f' }, el('span', { text: S.fPrep }), prepIn)),
+    el('div', { class: 'row' }, [2, 3, 4].map((n) => el('button', { type: 'button', class: 'btn', text: S.prepWeeks(n), onClick: () => { if (!P.isISO(f.start)) { startIn.focus(); return; } f.prepStart = P.addDays(f.start, -7 * n); f.prepTouched = true; prepIn.value = f.prepStart; } }))),
+    err,
+    el('div', { class: 'row' },
+      el('button', { type: 'submit', class: 'btn primary', text: S.createExam }),
+      state.exams.length ? el('button', { type: 'button', class: 'btn', onClick: () => { ui.creating = false; renderAll(); }, text: S.cancel }) : null));
+  setTimeout(() => nameIn.focus(), 0);
+  return form;
+}
+
+/* ---------- 시험 일정 탭 ---------- */
+function examForm(ex) {
+  const name = el('input', { type: 'text', value: ex.name, maxlength: '60', 'aria-label': S.fName });
+  const start = el('input', { type: 'date', value: ex.start, 'aria-label': S.fStart });
+  const end = el('input', { type: 'date', value: ex.end, 'aria-label': S.fEnd });
+  const prep = el('input', { type: 'date', value: ex.prepStart, 'aria-label': S.fPrep });
+  const apply = () => {
+    const f = { name: name.value, start: start.value, end: end.value, prepStart: prep.value };
+    const r = P.updateExamFields(ex, f);
+    if (r.error) { ui.examFormError = r.error; renderAll(); return; }
+    ui.examFormError = '';
+    commit();
+  };
+  [name, start, end, prep].forEach((i) => i.addEventListener('change', apply));
+  return el('div', { class: 'card stack' },
+    el('div', { class: 'row', style: 'justify-content:space-between' },
+      el('h2', { class: 'sec', style: 'margin:0', text: ex.name }),
+      iconBtn('trash-2', S.del, () => { ui.delExam = !ui.delExam; renderAll(); })),
+    ui.delExam ? el('div', { class: 'confirm' }, el('span', { text: S.examDeleteConfirm }),
+      el('div', { class: 'row' },
+        el('button', { type: 'button', class: 'btn danger', text: S.del, onClick: () => {
+          state.exams = state.exams.filter((x) => x.id !== ex.id); state.activeId = state.exams.length ? state.exams[0].id : null; ui.delExam = false; ui.selected.clear(); commit();
+        } }),
+        el('button', { type: 'button', class: 'btn', text: S.cancel, onClick: () => { ui.delExam = false; renderAll(); } }))) : null,
+    el('div', { class: 'grid4' },
+      el('label', { class: 'f', style: 'grid-column:span 2' }, el('span', { text: S.fName }), name),
+      el('label', { class: 'f' }, el('span', { text: S.fStart }), start),
+      el('label', { class: 'f' }, el('span', { text: S.fEnd }), end),
+      el('label', { class: 'f' }, el('span', { text: S.fPrep }), prep)),
+    ui.examFormError ? el('p', { class: 'err', text: ui.examFormError }) : null);
+}
+
+const COMMON_SUBJECTS = ['국어', '수학', '영어', '과학', '사회', '역사', '도덕', '기술·가정', '한문', '정보', '음악', '미술', '체육'];
+function subChip(ex, es) {
+  const sj = P.subjectOf(state, es);
+  const c = el('button', { type: 'button', class: 'subchip', draggable: 'true', style: '--c:' + sj.color, 'aria-haspopup': 'dialog', title: es.range || '',
+    onClick: (e) => openSubject(es.id, e.currentTarget),
+    'data-flip': 's:' + es.id,
+    onDragstart: (e) => dragStart(e, c, { kind: 'sub', id: es.id }),
+    onDragend: () => dragEnd(c) },
+    el('span', { class: 'l1' }, el('b', { text: sj.name }), szNode(es.plan)), es.range ? el('small', { text: es.range.split('\n')[0] }) : null);
+  return c;
+}
+function bindDrop(target, accept, onDrop) {
+  let depth = 0;
+  const on = () => accept(ui.drag);
+  target.addEventListener('dragenter', (e) => { if (!on()) return; e.preventDefault(); depth++; target.dataset.drop = ''; });
+  target.addEventListener('dragover', (e) => { if (!on()) return; e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+  target.addEventListener('dragleave', () => { if (!on()) return; depth = Math.max(0, depth - 1); if (!depth) delete target.dataset.drop; });
+  target.addEventListener('drop', (e) => { if (!on()) return; e.preventDefault(); e.stopPropagation(); depth = 0; delete target.dataset.drop; const d = ui.drag; ui.drag = null; delete document.body.dataset.drag;
+    ui.dropAt = { key: (d.kind === 'task' ? 't:' : 's:') + d.id, x: e.clientX || 0, y: e.clientY || 0 };
+    ui.landed = target.classList.contains('day') ? '.cal .day[data-date="' + target.dataset.date + '"]' : target.dataset.k ? '.eday[data-k="' + target.dataset.k + '"]' : target.classList.contains('vault') ? '.vault' : target.classList.contains('dp') ? '.dp' : null;
+    onDrop(d); });
+}
+function examTab(ex) {
+  const days = P.examDays(ex);
+  const dl = el('datalist', { id: 'subjectList' }, state.library.map((s) => el('option', { value: s.name })));
+  const addForm = (iso, key) => {
+    const input = el('input', { type: 'text', list: 'subjectList', placeholder: S.addSubPh, maxlength: '40', autocomplete: 'off', 'aria-label': S.addSub, 'data-fk': 'add-' + key, enterkeyhint: 'done' });
+    return el('form', { class: 'add', onSubmit: (e) => {
+      e.preventDefault();
+      const r = P.addSubs(state, ex, input.value, iso);
+      if (r.error) { toast(r.error); return; }
+      if (r.added > 1 || r.dup) toast(S.addedN(r.added, r.dup));
+      ui.focusKey = 'add-' + key; commit();
+    } }, input, iconBtn('plus', S.addSubDone, null, { type: 'submit' }));
+  };
+  const row = (iso, label, sub, key) => {
+    const subs = ex.subs.filter((s) => (iso ? s.examDate === iso : !s.examDate));
+    const r = el('div', { class: 'eday', 'data-k': key },
+      el('div', { class: 'lab' }, label, sub ? el('small', { text: sub }) : null),
+      el('div', { class: 'items' }, subs.map((s) => subChip(ex, s)), addForm(iso, key)));
+    bindDrop(r, (d) => d && d.kind === 'sub', (d) => { const es = ex.subs.find((s) => s.id === d.id); if (es) { P.setSubDate(ex, es, iso); commit(); } });
+    return r;
+  };
+  const have = new Set(ex.subs.map((x) => P.subjectOf(state, x).name));
+  const cand = [];
+  state.library.map((x) => x.name).concat(COMMON_SUBJECTS).forEach((nm) => { if (!have.has(nm) && !cand.includes(nm)) cand.push(nm); });
+  const quick = cand.length ? el('div', { class: 'quick' }, el('span', { class: 'muted', text: S.quickAdd }),
+    cand.slice(0, 14).map((nm) => el('button', { type: 'button', class: 'qchip', onClick: () => { const r = P.addSub(state, ex, nm, null); if (r.error) { toast(r.error); return; } commit(); } }, ico('plus'), nm))) : null;
+  return el('div', { class: 'stack' }, dl, examForm(ex),
+    el('div', null, el('h2', { class: 'sec', text: S.examSchedule }),
+      days.map((d, i) => row(d, S.dayN(i + 1), fmtFull(d), d)),
+      row(null, S.undated, '', 'undated'), quick));
+}
+
+/* ---------- 과목 편집 서랍 ---------- */
+function openSubject(esId, opener) {
+  ui.subId = esId; ui.pendingPlan = null; ui.delSub = false; ui.linkError = '';
+  openPanel('subject', S.subTitle, buildSubject, opener);
+}
+function buildSubject() {
+  const ex = cur();
+  const es = ex && ex.subs.find((s) => s.id === ui.subId);
+  if (!es) { closePanel(); return []; }
+  const sj = P.subjectOf(state, es);
+  const lib = state.library.find((s) => s.id === es.subjectId);
+  const nameErr = el('p', { class: 'err', hidden: true });
+  const name = el('input', { type: 'text', value: sj.name, maxlength: '40', 'data-autofocus': '', 'aria-label': S.subName, onChange: (e) => {
+    const r = P.renameSubject(state, es.subjectId, e.target.value);
+    if (r.error) { nameErr.textContent = r.error; nameErr.hidden = false; e.target.value = sj.name; return; }
+    nameErr.hidden = true; commit({ panel: false });
+  } });
+  const dateSel = el('select', { 'aria-label': S.subDate, onChange: (e) => { P.setSubDate(ex, es, e.target.value || null); commit(); } },
+    el('option', { value: '', text: S.undated, selected: !es.examDate }),
+    P.examDays(ex).map((d, i) => el('option', { value: d, selected: es.examDate === d, text: S.dayN(i + 1) + ' ' + fmtFull(d) })));
+  const sw = el('div', { class: 'swatches', role: 'group', 'aria-label': S.subColor }, P.PALETTE.map((c) =>
+    el('button', { type: 'button', class: 'sw', style: '--c:' + c, 'aria-label': c, 'aria-pressed': String(lib && lib.color === c), onClick: () => { if (lib) lib.color = c; commit({ panel: true }); } })));
+  const range = el('textarea', { rows: '3', maxlength: '2000', 'aria-label': S.subRange, onChange: (e) => { es.range = e.target.value.slice(0, 2000); commit({ panel: false }); } });
+  range.value = es.range;
+  const comment = el('textarea', { rows: '3', maxlength: '2000', 'aria-label': S.subComment, onChange: (e) => { es.comment = e.target.value.slice(0, 2000); commit({ panel: false }); } });
+  comment.value = es.comment;
+
+  const linkLabel = el('input', { type: 'text', placeholder: S.linkLabel, maxlength: '60', 'aria-label': S.linkLabel });
+  const linkUrl = el('input', { type: 'url', placeholder: S.linkUrl, 'aria-label': S.linkUrl, autocapitalize: 'off', spellcheck: 'false' });
+  const addLink = () => {
+    const href = P.normalizeLink(linkUrl.value);
+    if (!href) { ui.linkError = S.linkBad; refreshPanel(); return; }
+    es.links.push({ label: linkLabel.value.trim().slice(0, 60), url: href }); ui.linkError = ''; commit({ panel: true });
+  };
+  const links = el('div', { class: 'links' },
+    es.links.map((l, i) => el('div', { class: 'link' },
+      el('a', { href: l.url, target: '_blank', rel: 'noopener noreferrer', text: l.label || l.url }),
+      iconBtn('x', S.del, () => { es.links.splice(i, 1); commit({ panel: true }); }))),
+    el('div', { class: 'row' }, el('div', { style: 'flex:1 1 100px' }, linkLabel), el('div', { style: 'flex:2 1 160px' }, linkUrl),
+      el('button', { type: 'button', class: 'btn', text: S.linkAdd, onClick: addLink })),
+    ui.linkError ? el('p', { class: 'err', text: ui.linkError }) : null);
+
+  const draft = ui.pendingPlan || es.plan;
+  const num = (key, label) => el('label', null, label, el('input', { type: 'number', min: '0', max: String(P.MAX_COUNT), inputmode: 'numeric', value: draft[key], 'aria-label': label, onChange: (e) => {
+    const next = Object.assign({}, es.plan, { [key]: Math.min(P.MAX_COUNT, Math.max(0, Math.round(Number(e.target.value)) || 0)) });
+    const lost = P.previewPlanChange(ex, es, next);
+    if (lost > 0) { ui.pendingPlan = next; refreshPanel(); return; }
+    ui.pendingPlan = null; P.setPlan(ex, es, next); commit({ panel: true });
+  } }));
+  const sp = P.subProgress(ex, es);
+  const lostNow = ui.pendingPlan ? P.previewPlanChange(ex, es, ui.pendingPlan) : 0;
+  const plan = el('div', { class: 'field-group' },
+    el('div', { class: 't', text: S.planTitle }),
+    el('div', { class: 'plan' }, num('n', S.planN), num('m', S.planM), num('r', S.planR)),
+    el('div', { class: 'muted mono', style: 'font-size:12px', text: S.planSum(es.plan.n, es.plan.m, es.plan.r, sp.placed, sp.total) }),
+    ui.pendingPlan ? el('div', { class: 'confirm' }, el('span', { text: S.planCut(lostNow) }), el('div', { class: 'row' },
+      el('button', { type: 'button', class: 'btn danger', text: S.cut, onClick: () => { P.setPlan(ex, es, ui.pendingPlan); ui.pendingPlan = null; commit({ panel: true }); } }),
+      el('button', { type: 'button', class: 'btn', text: S.cancel, onClick: () => { ui.pendingPlan = null; refreshPanel(); } }))) : null);
+
+  const del = ui.delSub
+    ? el('div', { class: 'confirm' }, el('span', { text: S.subDelConfirm(sp.placed) }), el('div', { class: 'row' },
+      el('button', { type: 'button', class: 'btn danger', text: S.del, onClick: () => { P.removeSub(ex, es.id); ui.delSub = false; closePanel(); commit(); } }),
+      el('button', { type: 'button', class: 'btn', text: S.cancel, onClick: () => { ui.delSub = false; refreshPanel(); } })))
+    : el('div', null, el('button', { type: 'button', class: 'btn danger', onClick: () => { ui.delSub = true; refreshPanel(); } }, ico('trash-2'), S.subDel));
+
+  const f = (t, node) => el('label', { class: 'f' }, el('span', { text: t }), node);
+  return [f(S.subName, name), nameErr, el('div', { class: 'field-group' }, el('div', { class: 't', text: S.subColor }), sw), f(S.subDate, dateSel),
+    f(S.subRange, range), f(S.subComment, comment), el('div', { class: 'field-group' }, el('div', { class: 't', text: S.subLinks }), links), plan, del];
+}
+
+/* ---------- 준비 계획 탭 ---------- */
+function taskChip(ex, t, onMoved) {
+  const es = ex.subs.find((s) => s.id === t.esId);
+  const sj = es ? P.subjectOf(state, es) : { color: '#8FA3AD' };
+  const label = P.taskLabel(state, ex, t);
+  const kind = P.taskKind(ex, t);
+  const c = el('div', { class: 'chip', style: '--c:' + sj.color, draggable: 'true', title: kind, dataset: Object.assign({ kind }, t.done ? { done: '' } : {}),
+    'data-flip': 't:' + t.id,
+    onDragstart: (e) => dragStart(e, c, { kind: 'task', id: t.id }),
+    onDragend: () => dragEnd(c) },
+    el('button', { type: 'button', class: 'ck', role: 'checkbox', 'aria-checked': String(t.done), 'aria-label': label + ' ' + S.done, onClick: () => { P.toggleDone(ex, t.id); commit(); } }, el('span', null, ico('check'))),
+    el('button', { type: 'button', class: 'lb', 'aria-haspopup': 'dialog', 'aria-label': label + ' ' + S.moveDate, onClick: (e) => openPicker(t.id, e.currentTarget) }, ico(KIND_ICON[kind] || 'book-open', 'k'), label, ico('calendar-days', 'mv')));
+  return c;
+}
+function dayFill(info) {
+  if (info.over) return 1;
+  return info.count === 0 ? 0.12 : Math.min(1, 0.3 + 0.7 * info.ratio);
+}
+function afterMove(ex, iso) {
+  if (!iso) return;
+  const info = P.dayInfo(state, ex, iso);
+  if (info.over) toast(S.overLimit(fmtMD(iso), info.limit));
+}
+function lvChip(ex, iso, info) {
+  const lab = levelLabel(info.level);
+  return el('button', { type: 'button', class: 'lvchip', 'data-lv': info.level, 'aria-haspopup': 'dialog', 'aria-expanded': 'false', 'aria-label': S.levelChip(fmtFull(iso), lab), title: S.levelPer(info.limit),
+    onClick: (e) => openLevelPop(ex, iso, e.currentTarget) }, meter(info.level), lab);
+}
+function openLevelPop(ex, iso, anchor) {
+  const curLv = P.levelOf(ex, iso);
+  const overridden = !!(ex.days[iso] && ex.days[iso].level);
+  openPopover(anchor, S.levelTitle, () => el('div', { style: 'display:grid;gap:2px' },
+    el('div', { role: 'radiogroup', 'aria-label': S.levelTitle, style: 'display:grid;gap:2px' }, P.LEVELS.map((l) =>
+      el('button', { type: 'button', class: 'opt', role: 'radio', 'aria-checked': String(curLv === l.key), 'data-autofocus': curLv === l.key ? '' : null,
+        onClick: () => { P.setDayLevel(ex, [iso], l.key === P.defaultLevel(ex, iso) ? null : l.key); closePopover(); commit(); } },
+        meter(l.key), l.label, el('small', { text: S.levelPer(state.limits[l.key]) })))),
+    overridden ? el('button', { type: 'button', class: 'opt', onClick: () => { P.setDayLevel(ex, [iso], null); closePopover(); commit(); } }, ico('rotate-ccw'), S.levelDefault, el('small')) : null,
+    el('button', { type: 'button', class: 'opt', onClick: () => { P.setHoliday(ex, iso, !P.isHoliday(ex, iso)); closePopover(); commit(); } }, ico('flag'), P.isHoliday(ex, iso) ? S.holidayOff : S.holidayOn, el('small'))));
+}
+function memoBtn(ex, iso) {
+  const note = (ex.days[iso] && ex.days[iso].note) || '';
+  return el('button', { type: 'button', class: 'memo', dataset: note ? { has: '' } : {}, 'aria-haspopup': 'dialog', 'aria-expanded': 'false', 'aria-label': fmtFull(iso) + ' ' + S.memo, title: S.memo,
+    onClick: (e) => openMemoPop(ex, iso, e.currentTarget) }, ico('sticky-note'), note ? el('span', { text: note }) : null);
+}
+function openMemoPop(ex, iso, anchor) {
+  const before = (ex.days[iso] && ex.days[iso].note) || '';
+  let ta = null;
+  const finish = () => {
+    const v = ta.value.trim().slice(0, 60);
+    if (v !== before) { P.setDayNote(ex, iso, v); commit({ render: false }); }
+    anchor.replaceChildren(ico('sticky-note'));
+    if (v) { anchor.append(el('span', { text: v })); anchor.dataset.has = ''; } else delete anchor.dataset.has;
+  };
+  openPopover(anchor, fmtFull(iso) + ' ' + S.memo, () => {
+    ta = el('textarea', { rows: '2', maxlength: '60', placeholder: S.memoPh, 'aria-label': S.memo, 'data-autofocus': '',
+      onKeydown: (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); closePopover(true); } } });
+    ta.value = before;
+    return el('div', { style: 'display:grid;gap:6px' }, ta, el('div', { class: 'row', style: 'justify-content:flex-end' },
+      before ? el('button', { type: 'button', class: 'btn', text: S.memoClear, onClick: () => { ta.value = ''; closePopover(true); } }) : null,
+      el('button', { type: 'button', class: 'btn primary', text: S.memoDone, onClick: () => closePopover(true) })));
+  }, finish);
+}
+const monOf = (iso) => P.addDays(iso, -((P.weekday(iso) + 6) % 7));
+function vaultNode(ex, loose) {
+  const vault = el('section', { class: 'vault card', 'data-collapsed': ui.vaultOpen ? null : '' });
+  vault.append(el('h3', { class: 'vt', text: S.vaultTitle }));
+  if (!ex.subs.length) {
+    vault.append(el('p', { class: 'muted', text: S.vaultNoSubs }), el('button', { type: 'button', class: 'btn', text: S.goExam, onClick: () => setTab('exam') }));
+  } else if (!loose.length) {
+    vault.append(el('p', { class: 'muted', text: S.vaultNone }));
+  } else {
+    ex.subs.forEach((es) => {
+      const mine = loose.filter((t) => t.esId === es.id).sort((a, b) => (a.type === b.type ? a.seq - b.seq : a.type === 's' ? -1 : 1));
+      if (!mine.length) return;
+      const sj = P.subjectOf(state, es);
+      vault.append(el('div', { class: 'grp' }, el('div', { class: 'gh', style: '--c:' + sj.color }, el('span', { class: 'dot' }), sj.name, szNode(es.plan), el('span', { class: 'muted mono', title: S.vaultCount(mine.length), text: mine.length })),
+        el('div', { class: 'items' }, mine.map((t) => taskChip(ex, t)))));
+    });
+  }
+  bindDrop(vault, (d) => d && d.kind === 'task', (d) => { P.moveTask(ex, d.id, null); commit(); });
+  return vault;
+}
+/* 날짜 상세: 선택한 날의 바쁨 정도, 메모, 할일 */
+function dayDetail(ex, iso) {
+  const today = P.todayISO();
+  const map = P.tasksByDate(ex);
+  const info = P.dayInfo(state, ex, iso, map);
+  const hol = P.holidayName(ex, iso);
+  const w = P.weekday(iso);
+  const exIdx = P.examDays(ex).indexOf(iso) + 1;
+  const mine = (map[iso] || []).slice().sort((a, b) => a.esId.localeCompare(b.esId) || a.seq - b.seq);
+  const card = el('section', { class: 'dp card', 'data-date': iso, 'data-level': info.level, dataset: info.over ? { over: '' } : {} },
+    el('div', { class: 'dh' },
+      el('h3', { class: 'date', 'data-w': w, 'data-hol': hol ? '' : null }, fmtMD(iso), el('span', { class: 'wd', text: WD[w] })),
+      iso === today ? el('span', { class: 'tag today', text: S.today }) : null,
+      hol ? el('span', { class: 'tag', text: hol }) : null,
+      exIdx ? el('span', { class: 'tag', text: S.examDayN(exIdx) }) : null,
+      el('span', { class: 'grow' }), lvChip(ex, iso, info)),
+    el('div', { class: 'dh' }, memoBtn(ex, iso), el('span', { class: 'grow' }),
+      el('span', { class: 'cnt', 'data-over': info.over ? '' : null, title: S.levelPer(info.limit) }, info.over ? ico('triangle-alert') : null, info.count + '/' + info.limit)),
+    exIdx ? el('div', { class: 'eline', text: ex.subs.filter((x) => x.examDate === iso).map((x) => P.subjectOf(state, x).name).join(', ') }) : null,
+    el('div', { class: 'chips' }, mine.map((t) => taskChip(ex, t))));
+  bindDrop(card, (d) => d && d.kind === 'task', (d) => { P.moveTask(ex, d.id, iso); commit(); afterMove(ex, iso); });
+  return card;
+}
+function bulkPanel(ex, days) {
+  const sel = ui.selected;
+  const map = P.tasksByDate(ex);
+  const pickBy = (fn) => { days.forEach((d) => { if (fn(d)) sel.add(d); }); renderAll(); };
+  return el('section', { class: 'bulk card', role: 'region', 'aria-label': S.selCount(sel.size) },
+    el('h3', { class: 'vt', text: S.selCount(sel.size) }),
+    el('div', { class: 'row' },
+      el('button', { type: 'button', class: 'btn', text: S.selWeekend, onClick: () => pickBy((d) => P.weekday(d) === 0 || P.weekday(d) === 6 || P.isHoliday(ex, d)) }),
+      el('button', { type: 'button', class: 'btn', text: S.selEmpty, onClick: () => pickBy((d) => !(map[d] || []).length) }),
+      sel.size ? el('button', { type: 'button', class: 'btn', text: S.selClear, onClick: () => { sel.clear(); ui.anchor = null; renderAll(); } }) : null),
+    sel.size ? el('div', { class: 'row' }, P.LEVELS.map((l) => el('button', { type: 'button', class: 'lvchip', 'data-lv': l.key, title: S.levelPer(state.limits[l.key]), onClick: () => { P.setDayLevel(ex, [...sel], l.key); commit(); } }, meter(l.key), l.label))) : null,
+    sel.size ? el('div', { class: 'row' }, el('button', { type: 'button', class: 'btn', text: S.levelReset, onClick: () => { P.setDayLevel(ex, [...sel], null); commit(); } })) : null);
+}
+function calCell(ex, iso, map, days, today, examDayIdx) {
+  const sel = ui.selected;
+  const w = P.weekday(iso);
+  const info = P.dayInfo(state, ex, iso, map);
+  const hol = P.holidayName(ex, iso);
+  const mine = (map[iso] || []).slice().sort((a, b) => a.esId.localeCompare(b.esId) || a.seq - b.seq);
+  const note = (ex.days[iso] && ex.days[iso].note) || '';
+  const pick = (shift) => {
+    if (ui.edit) {
+      if (shift && ui.anchor && days.includes(ui.anchor)) {
+        const a = days.indexOf(ui.anchor), b = days.indexOf(iso);
+        days.slice(Math.min(a, b), Math.max(a, b) + 1).forEach((d) => sel.add(d));
+      } else if (sel.has(iso)) sel.delete(iso); else sel.add(iso);
+      ui.anchor = iso; renderAll();
+    } else if (isNarrow()) {
+      ui.day = iso; renderAll(); openPanel('day', fmtFull(iso), () => dayDetail(cur(), ui.day), null);
+    } else { ui.day = iso; renderAll(); }
+  };
+  const num = (iso.slice(8) === '01' || iso === days[0]) ? fmtMD(iso) : String(+iso.slice(8));
+  const cell = el('div', { class: 'day', 'data-date': iso, 'data-level': info.level, style: '--fill:' + dayFill(info).toFixed(2), onClick: (e) => { if (!e.target.closest('.dnum,.cc')) pick(e.shiftKey); },
+    dataset: Object.assign({}, info.over ? { over: '' } : {}, iso === today ? { today: '' } : {}, sel.has(iso) ? { sel: '' } : {}, !ui.edit && ui.day === iso ? { cur: '' } : {}, iso < today ? { past: '' } : {}) },
+    el('div', { class: 'ch' },
+      ui.edit ? el('input', { type: 'checkbox', checked: sel.has(iso), 'aria-label': fmtFull(iso) + ' 선택', onClick: (e) => { e.stopPropagation(); if (e.shiftKey && ui.anchor && days.includes(ui.anchor)) { e.preventDefault(); pick(true); return; } if (e.target.checked) sel.add(iso); else sel.delete(iso); ui.anchor = iso; renderAll(); } }) : null,
+      el('button', { type: 'button', class: 'dnum', 'data-w': w, 'data-hol': hol ? '' : null, 'aria-label': fmtFull(iso) + (ui.edit ? ' 선택' : ' 열기'), 'aria-pressed': ui.edit ? String(sel.has(iso)) : null, onClick: (e) => pick(e.shiftKey), text: num }),
+      hol ? el('span', { class: 'hn', text: hol }) : null,
+      examDayIdx[iso] ? el('span', { class: 'hn ex', text: S.examDayN(examDayIdx[iso]) }) : null,
+      el('span', { class: 'grow' }),
+      note ? el('span', { class: 'mi', title: note }, ico('sticky-note')) : null,
+      info.over ? el('span', { class: 'ov', title: info.count + '/' + info.limit }, ico('triangle-alert')) : null,
+      meter(info.level)),
+    el('div', { class: 'cc-list' }, mine.map((t) => {
+      const es = ex.subs.find((x) => x.id === t.esId);
+      const sj = es ? P.subjectOf(state, es) : { color: '#8FA3AD' };
+      const kind = P.taskKind(ex, t);
+      const c = el('div', { class: 'cc', style: '--c:' + sj.color, draggable: 'true', title: P.taskLabel(state, ex, t) + ' · ' + kind, dataset: Object.assign({ kind }, t.done ? { done: '' } : {}),
+        'data-flip': 't:' + t.id,
+        onDragstart: (e) => dragStart(e, c, { kind: 'task', id: t.id }),
+        onDragend: () => dragEnd(c) }, ico(KIND_ICON[kind] || 'book-open', 'k'), el('span', { text: P.taskLabel(state, ex, t) }));
+      return c;
+    })),
+    mine.length ? el('div', { class: 'dots', 'aria-hidden': 'true' }, mine.map((t) => { const es = ex.subs.find((x) => x.id === t.esId); return el('i', { style: '--c:' + (es ? P.subjectOf(state, es).color : '#8FA3AD'), dataset: t.done ? { done: '' } : {} }); })) : null);
+  bindDrop(cell, (d) => d && d.kind === 'task', (d) => { P.moveTask(ex, d.id, iso); commit(); afterMove(ex, iso); });
+  return cell;
+}
+function boardTab(ex) {
+  const today = P.todayISO();
+  const days = P.prepDays(ex);
+  const map = P.tasksByDate(ex);
+  const loose = P.unplaced(ex);
+  const od = P.overdue(ex, today);
+  const sel = ui.selected;
+  if (!ui.day || !days.includes(ui.day)) ui.day = days.includes(today) ? today : days[0];
+
+  const toolbar = el('div', { class: 'toolbar' },
+    el('button', { type: 'button', class: 'btn vault-toggle', 'aria-expanded': String(ui.vaultOpen), onClick: () => { ui.vaultOpen = !ui.vaultOpen; renderAll(); }, text: S.vaultCount(loose.length) }),
+    el('button', { type: 'button', class: 'btn', 'aria-pressed': String(ui.edit), onClick: () => { ui.edit = !ui.edit; if (!ui.edit) { sel.clear(); ui.anchor = null; } closePopover(); renderAll(); } }, ico('pencil'), S.editMode),
+    el('button', { type: 'button', class: 'btn', onClick: () => { ui.recapOpen = !ui.recapOpen; renderAll(); }, 'aria-expanded': String(ui.recapOpen) }, ico('rotate-ccw'), S.recapOpen),
+    el('span', { class: 'spacer' }),
+    days.includes(today) ? el('button', { type: 'button', class: 'btn', onClick: () => { ui.day = today; renderAll(); const t = document.querySelector('.day[data-today]'); if (t) t.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, text: S.jumpToday }) : null);
+
+  const recap = ui.recapOpen ? (() => {
+    const left = ex.tasks.filter((t) => t.type === 'r' && !t.date).length;
+    const n = el('input', { type: 'number', min: '1', max: '30', value: state.recapDays, 'aria-label': S.recapFrom, onChange: (e) => { state.recapDays = Math.min(30, Math.max(1, Math.round(Number(e.target.value)) || 7)); commit({ render: false }); } });
+    return el('div', { class: 'card row', style: 'margin-bottom:10px' },
+      el('span', { text: S.recapFrom }), n, el('span', { text: S.recapDays }),
+      el('button', { type: 'button', class: 'btn primary', text: S.recapRun, onClick: () => {
+        const r = P.recapBatch(state, ex, state.recapDays, today);
+        if (!r.hasRecap) { toast(S.recapNone); return; }
+        toast(S.recapDone(r.placed) + (r.skipped ? ' ' + S.recapSkip(r.skipped) : '')); commit();
+      } }), el('span', { class: 'muted', text: S.recapLeft(left) }));
+  })() : null;
+
+  const banner = od.length ? el('div', { class: 'banner' }, el('b', { text: S.overdue(od.length) }),
+    today <= ex.end ? el('button', { type: 'button', class: 'btn', text: S.carry, onClick: () => carry(ex, today) }) : null) : null;
+
+  const examDayIdx = {};
+  P.examDays(ex).forEach((d, i) => { examDayIdx[d] = i + 1; });
+  const cal = el('div', { class: 'cal' });
+  [1, 2, 3, 4, 5, 6, 0].forEach((w) => cal.append(el('div', { class: 'wh', 'data-w': w, text: WD[w] })));
+  const first = monOf(days[0]);
+  const last = days[days.length - 1];
+  for (let d = first; d <= P.addDays(monOf(last), 6); d = P.addDays(d, 1)) {
+    cal.append(days.includes(d) ? calCell(ex, d, map, days, today, examDayIdx) : el('div', { class: 'day pad', 'aria-hidden': 'true' }));
+  }
+
+  const side = el('aside', { class: 'side' }, ui.edit ? bulkPanel(ex, days) : dayDetail(ex, ui.day), vaultNode(ex, loose));
+  return el('div', null, banner, toolbar, recap, el('div', { class: 'board' }, cal, side));
+}
+function carry(ex, today) {
+  const r = P.carryOver(ex, today);
+  if (!r.moved) return;
+  commit();
+  toast(S.carried(r.moved, fmtMD(r.target)));
+  afterMove(ex, r.target);
+}
+
+/* 날짜 고르기 시트: 탭으로 옮긴다 */
+function openPicker(taskId, opener) {
+  openPanel('picker', S.pickTitle, () => {
+    const ex = cur();
+    const t = ex && ex.tasks.find((x) => x.id === taskId);
+    if (!t) { closePanel(); return []; }
+    const map = P.tasksByDate(ex);
+    const out = [el('p', { class: 'muted', style: 'margin:0', text: P.taskLabel(state, ex, t) })];
+    if (t.date) out.push(el('button', { type: 'button', class: 'btn', 'data-autofocus': '', text: S.toVault, onClick: () => { P.moveTask(ex, t.id, null); closePanel(); commit(); } }));
+    P.prepDays(ex).forEach((iso) => {
+      const info = P.dayInfo(state, ex, iso, map);
+      const hol = P.holidayName(ex, iso);
+      out.push(el('button', { type: 'button', class: 'pick', 'data-level': info.level, style: '--fill:' + dayFill(info).toFixed(2), 'aria-current': String(t.date === iso), dataset: info.over ? { over: '' } : {},
+        onClick: () => { P.moveTask(ex, t.id, iso); closePanel(); commit(); afterMove(ex, iso); } },
+        el('span', null, fmtFull(iso), hol ? el('small', { text: ' ' + hol }) : null, ' ', meter(info.level), el('small', { text: levelLabel(info.level) })),
+        el('span', { class: 'mono', 'data-over': info.over ? '' : null, text: info.count + '/' + info.limit })));
+    });
+    return out;
+  }, opener);
+}
+
+/* ---------- 오늘 탭 ---------- */
+function todayTab(ex) {
+  const today = P.todayISO();
+  const map = P.tasksByDate(ex);
+  const days = P.prepDays(ex);
+  const od = P.overdue(ex, today);
+  const pr = P.progress(ex);
+  const row = (t) => {
+    const es = ex.subs.find((s) => s.id === t.esId);
+    const sj = es ? P.subjectOf(state, es) : { color: '#8FA3AD' };
+    const kind = P.taskKind(ex, t);
+    return el('div', { class: 'trow', style: '--c:' + sj.color, dataset: Object.assign({ kind }, t.done ? { done: '' } : {}) },
+      el('button', { type: 'button', class: 'ck', role: 'checkbox', 'aria-checked': String(t.done), 'aria-label': P.taskLabel(state, ex, t) + ' ' + S.done, onClick: () => { P.toggleDone(ex, t.id); commit(); } }, el('span', null, ico('check'))),
+      el('div', { class: 'tl' }, ico(KIND_ICON[kind] || 'book-open', 'k'), P.taskLabel(state, ex, t), el('small', { text: kind + (t.date ? ' · ' + fmtFull(t.date) : '') })),
+      iconBtn('calendar-days', S.moveDate, (e) => openPicker(t.id, e.currentTarget)));
+  };
+  let head;
+  const dToStart = P.diffDays(today, ex.start);
+  if (today > ex.end) head = S.afterExam;
+  else if (today >= ex.start) head = S.duringExam;
+  else head = S.remainDays(dToStart);
+  const todays = (map[today] || []).slice().sort((a, b) => a.esId.localeCompare(b.esId) || a.seq - b.seq);
+  const upcoming = days.filter((d) => d > today && (map[d] || []).length).slice(0, 3);
+  const inRange = days.includes(today);
+
+  return el('div', { class: 'today' },
+    el('div', { class: 'card' }, el('div', { class: 'muted', text: ex.name }), el('div', { class: 'big', text: head }),
+      pr.total ? el('div', { style: 'margin-top:10px' }, el('div', { class: 'bar' }, el('i', { style: 'width:' + Math.round((pr.done / pr.total) * 100) + '%' })), el('div', { class: 'muted mono', style: 'font-size:12px;margin-top:4px', text: pr.done + '/' + pr.total })) : null),
+    od.length ? el('div', null, el('div', { class: 'banner' }, el('b', { text: S.overdue(od.length) }),
+      today <= ex.end ? el('button', { type: 'button', class: 'btn', text: S.carry, onClick: () => carry(ex, today) }) : null), od.map(row)) : null,
+    el('div', null, el('h2', { class: 'sec', text: S.today + ' ' + fmtFull(today) }),
+      inRange ? (todays.length ? todays.map(row) : el('p', { class: 'muted', text: S.todayEmpty })) : el('p', { class: 'muted', text: today < ex.prepStart ? S.todayOut(fmtMD(ex.prepStart)) : S.afterExam }),
+      !todays.length ? el('button', { type: 'button', class: 'btn', text: S.goBoard, onClick: () => setTab('board') }) : null),
+    upcoming.length ? el('div', null, el('h2', { class: 'sec', text: S.upcoming }), upcoming.map((d) => el('div', { style: 'margin-bottom:12px' }, el('div', { class: 'muted mono', style: 'font-size:13px;margin-bottom:4px', text: fmtFull(d) }), (map[d] || []).map(row)))) : null,
+    ex.subs.length ? el('div', null, el('h2', { class: 'sec', text: S.subjects }), ex.subs.map((es) => {
+      const sp = P.subProgress(ex, es);
+      const sj = P.subjectOf(state, es);
+      return el('div', { class: 'prow', style: '--c:' + sj.color }, el('span', null, el('span', { class: 'dot' }), ' ', sj.name),
+        el('div', { class: 'bar' }, el('i', { style: 'width:' + (sp.total ? Math.round((sp.done / sp.total) * 100) : 0) + '%;background:' + sj.color })), el('span', { class: 'mono', text: sp.done + '/' + sp.total }));
+    })) : null);
+}
+
+/* ---------- 인쇄용 달력 보기 ---------- */
+const PRINT_CSS = `
+.pg{--ink:#1F1E1D;--muted:#6B6A64;--line:#BDBAAA;--red:#B0332C;--blue:#2F6FA3;font:11px/1.35 "Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;color:var(--ink);background:#fff;padding:12px}
+.pg *{box-sizing:border-box}
+.pg-title{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:4px;font-size:16px}
+.pg-title span{font-size:11px;color:var(--muted)}
+.pg-legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:10px;color:var(--muted);margin-bottom:6px;align-items:center}
+.pg-legend span{display:inline-flex;gap:3px;align-items:center}
+.pg svg.i{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.pg-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid var(--line);border-left:1px solid var(--line)}
+.pg-wd{padding:3px 6px;font-weight:600;background:#F0EEE6;border-right:1px solid var(--line);border-bottom:1px solid var(--line);text-align:center}
+.pg-wd:nth-child(6){color:var(--blue)}.pg-wd:nth-child(7){color:var(--red)}
+.pg-cell{min-height:96px;padding:3px 5px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);min-width:0}
+.pg-cell[data-we]{background:#F7F5EE}
+.pg-cell.out{background:repeating-linear-gradient(135deg,#fff,#fff 5px,#F3F2EC 5px,#F3F2EC 6px)}
+.pg-h{display:flex;gap:4px;align-items:center}
+.pg-h b{font-size:12px}
+.pg-cell[data-hol] .pg-h b{color:var(--red)}
+.pg-h small{color:var(--red);font-size:9px}
+.pg-h .meter{margin-left:auto}
+.pg .meter{display:inline-flex;gap:1px;align-items:flex-end;height:10px}
+.pg .meter i{width:3px;border-radius:1px;background:#DDDACD}
+.pg .meter i:nth-child(1){height:4px}.pg .meter i:nth-child(2){height:5px}.pg .meter i:nth-child(3){height:7px}.pg .meter i:nth-child(4){height:8px}.pg .meter i:nth-child(5){height:10px}
+.pg .meter i[data-on]{background:var(--lvc,#D8A532)}
+.pg [data-lv="calm"]{--lvc:#5B9A68}.pg [data-lv="easy"]{--lvc:#9AAE4B}.pg [data-lv="normal"]{--lvc:#D8A532}.pg [data-lv="busy"]{--lvc:#E07B39}.pg [data-lv="packed"]{--lvc:#C8423B}
+.pg-exam{font-size:9.5px;font-weight:600;background:#F6E1D8;border-radius:3px;padding:0 4px;margin:2px 0}
+.pg-memo{font-size:9.5px;color:var(--muted);font-style:italic}
+.pg-t{list-style:none;margin:2px 0 0;padding:0}
+.pg-t li{display:flex;gap:3px;align-items:center;font-size:10px;line-height:1.55}
+.pg-t .bx{width:8px;height:8px;border:1px solid #555;border-radius:2px;flex:none}
+.pg-t li[data-done] .bx{background:#555}
+.pg-t li[data-done]{color:var(--muted);text-decoration:line-through}
+.pgs>.pg+.pg{margin-top:16px;border-top:1px dashed var(--line)}
+.pg,.pg *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pg button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;text-align:left;cursor:pointer;min-height:0}
+.pg-t .pt{display:flex;gap:3px;align-items:center;width:100%}
+.pg-t li[data-done] .pt{text-decoration:line-through}
+.pg-cell[data-today]{box-shadow:inset 0 0 0 2px #D97757}
+.wk{--accent:#B5502D;padding:16px 18px}
+.wk-head{display:flex;align-items:flex-end;gap:18px;padding-bottom:9px;border-bottom:2px solid var(--ink)}
+.wk-head .ex{font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--accent)}
+.wk-head h3{margin:1px 0 0;font-size:25px;line-height:1.15;font-weight:800;letter-spacing:-.02em;white-space:nowrap}
+.wk-sum{display:flex;flex-wrap:wrap;gap:5px;flex:1;justify-content:flex-end;min-width:0}
+.wk-sum span{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:2px 9px;border-radius:999px;border:1px solid var(--line);background:#fff;white-space:nowrap}
+.wk-sum span i{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.wk-sum span b{font-weight:700}
+.wk-sum .tot{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:600}
+.wk-head .pgn{font:600 11px/1 "Geist Mono",ui-monospace,monospace;color:var(--muted);white-space:nowrap;padding-bottom:4px}
+.wk-grid{display:grid;gap:8px;margin-top:9px}
+.wk-grid.w1{grid-template-columns:repeat(4,minmax(0,1fr))}.wk-grid.w2{grid-template-columns:repeat(5,minmax(0,1fr))}
+.wk-day.note{background:#FBFAF5}.wk-day.note .wk-dh{padding-top:10px;padding-bottom:8px}
+.wk-day{display:flex;flex-direction:column;min-width:0;border:1px solid var(--line);border-radius:9px;background:#fff;overflow:hidden}
+.wk-grid.w1 .wk-day{min-height:80mm}.wk-grid.w2 .wk-day{min-height:51mm}
+.wk-day[data-we]{background:#FBFAF5}
+.wk-day.out{border-style:dashed;background:transparent;opacity:.45}
+.wk-dh{display:flex;align-items:baseline;gap:5px;padding:7px 9px 5px;border-bottom:1px solid var(--line)}
+.wk-dh .n{font-size:26px;line-height:1;font-weight:800;letter-spacing:-.03em}
+.wk-grid.w2 .wk-dh .n{font-size:22px}
+.wk-grid.w1 .wk-row b{font-size:14px}.wk-grid.w1 .wk-row small{font-size:11px}.wk-grid.w1 .wk-row{padding:6px 8px}
+.wk-dh .w{font-size:12px;font-weight:700;color:var(--muted)}
+.wk-dh small{font-size:10px;color:var(--red);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.wk-dh .d{margin-left:auto;font:600 10px/1 "Geist Mono",ui-monospace,monospace;color:var(--muted);white-space:nowrap}
+.wk-day[data-w="6"] .n,.wk-day[data-w="6"] .w{color:var(--blue)}
+.wk-day[data-w="0"] .n,.wk-day[data-w="0"] .w,.wk-day[data-hol] .n,.wk-day[data-hol] .w{color:var(--red)}
+.wk-day[data-today]{border-color:#D97757;box-shadow:0 0 0 2px #D97757}
+.wk-day[data-today] .wk-dh{background:#FBEDE6}
+.wk-day[data-exam] .wk-dh{background:var(--ink);border-bottom-color:var(--ink)}
+.wk-day[data-exam] .wk-dh .n,.wk-day[data-exam] .wk-dh .w,.wk-day[data-exam] .wk-dh .d{color:#fff}
+.wk-exam{margin:7px 8px 0;padding:5px 8px;border-radius:6px;background:#F6E1D8;color:#7A3418;font-size:11.5px;line-height:1.35}
+.wk-exam b{display:block;font-size:10px;letter-spacing:.04em}
+.wk-memo{display:flex;gap:5px;align-items:flex-start;margin:7px 8px 0;padding:4px 7px;border-radius:6px;background:#F4F1E4;font-size:11px;color:#55534C}
+.wk-memo svg.i{margin-top:2px}
+.wk-t{list-style:none;margin:0;padding:6px 8px 0}
+.wk-t li+li{margin-top:3px}
+.wk .wk-row{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:7px;align-items:center;width:100%;padding:4px 6px;border-radius:6px;border:1px solid color-mix(in srgb,var(--c) 45%,#fff);background:color-mix(in srgb,var(--c) 11%,#fff)}
+.wk .wk-row[data-kind="리캡"]{border-style:dashed}
+.wk-row .bx{grid-row:span 2;width:15px;height:15px;border:1.5px solid var(--c);border-radius:4px;background:#fff;display:inline-flex;align-items:center;justify-content:center;color:#fff}
+.wk-row .bx svg.i{width:11px;height:11px;stroke-width:3}
+.wk-row b{font-size:12.5px;font-weight:700;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wk-row small{font-size:10px;color:var(--muted);line-height:1.2}
+.wk-row[data-done] .bx{background:var(--c)}
+.wk-row[data-done] b{text-decoration:line-through;color:var(--muted);font-weight:500}
+.wk-lines{flex:1;min-height:14mm;margin:8px 9px 9px;background:repeating-linear-gradient(to bottom,transparent 0,transparent calc(7mm - 1px),#E4E1D3 calc(7mm - 1px),#E4E1D3 7mm)}
+@media print{@page{size:A4 landscape;margin:8mm}.pg{padding:0;break-after:page;page-break-after:always}.pg:last-child{break-after:auto;page-break-after:auto}.pgs>.pg+.pg{margin-top:0;border-top:0}.pg-cell{min-height:27mm}.wk-day{break-inside:avoid}.wk-day[data-today]{box-shadow:none;border-color:var(--line)}.wk-day[data-today] .wk-dh{background:transparent}.pg-cell[data-today]{box-shadow:none}}
+`;
+const escHtml = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function printGrid(ex, perPage) {
+  const days = P.prepDays(ex);
+  const map = P.tasksByDate(ex);
+  const mon = (iso) => (P.weekday(iso) + 6) % 7;
+  const first = P.addDays(days[0], -mon(days[0]));
+  const last = P.addDays(days[days.length - 1], 6 - mon(days[days.length - 1]));
+  const inRange = new Set(days);
+  const today = P.todayISO();
+  const examIdx = {};
+  P.examDays(ex).forEach((d, i) => { examIdx[d] = i + 1; });
+  const all = P.rangeDays(first, last);
+  const listOf = (iso) => (map[iso] || []).slice().sort((a, b) => a.esId.localeCompare(b.esId) || a.seq - b.seq);
+  const namesOf = (iso) => ex.subs.filter((x) => x.examDate === iso).map((x) => P.subjectOf(state, x).name).join(', ');
+  const colorOf = (t) => { const es = ex.subs.find((x) => x.id === t.esId); return es ? P.subjectOf(state, es).color : '#8A8578'; };
+  const toggle = (t) => () => { P.toggleDone(ex, t.id); commit(); };
+  if (!perPage) {
+    const cellOf = (iso) => {
+      if (!inRange.has(iso)) return el('div', { class: 'pg-cell out' });
+      const w = P.weekday(iso);
+      const hol = P.holidayName(ex, iso);
+      const note = (ex.days[iso] && ex.days[iso].note) || '';
+      const label = iso === ex.prepStart || iso.slice(8) === '01' ? fmtMD(iso) : String(+iso.slice(8));
+      return el('div', { class: 'pg-cell', dataset: Object.assign({}, w === 0 || w === 6 ? { we: '' } : {}, hol ? { hol: '' } : {}, iso === today ? { today: '' } : {}) },
+        el('div', { class: 'pg-h' }, el('b', { text: label }), hol ? el('small', { text: hol }) : null),
+        examIdx[iso] ? el('div', { class: 'pg-exam', text: S.examLine(examIdx[iso], namesOf(iso)) }) : null,
+        note ? el('div', { class: 'pg-memo', text: note }) : null,
+        el('ul', { class: 'pg-t' }, listOf(iso).map((t) => el('li', { dataset: t.done ? { done: '' } : {} },
+          el('button', { type: 'button', class: 'pt', role: 'checkbox', 'aria-checked': String(t.done), onClick: toggle(t) }, el('i', { class: 'bx' }), ico(KIND_ICON[P.taskKind(ex, t)] || 'book-open'), el('span', { text: P.taskLabel(state, ex, t) }))))));
+    };
+    const lg = (...k) => el('span', null, ...k);
+    return el('div', { class: 'pgs' }, el('div', { class: 'pg' },
+      el('div', { class: 'pg-title' }, el('b', { text: ex.name }), el('span', { text: fmtFull(ex.prepStart) + ' ~ ' + fmtFull(ex.end) })),
+      el('div', { class: 'pg-legend' }, lg(ico('book-open'), S.legendStudy), lg(ico('pen-line'), S.legendWork), lg(ico('rotate-ccw'), S.legendRecap)),
+      el('div', { class: 'pg-grid' }, ['월', '화', '수', '목', '금', '토', '일'].map((d) => el('div', { class: 'pg-wd', text: d })), all.map(cellOf))));
+  }
+  /* 주간 달력: 한 페이지에 1주 또는 2주. 날짜마다 카드, 아래는 손으로 쓸 줄 칸 */
+  const kdate = (iso) => +iso.slice(5, 7) + '월 ' + +iso.slice(8) + '일';
+  const dayOf = (iso) => {
+    const w = P.weekday(iso);
+    if (!inRange.has(iso)) return el('div', { class: 'wk-day out' }, el('div', { class: 'wk-dh' }, el('span', { class: 'n', text: String(+iso.slice(8)) }), el('span', { class: 'w', text: WD[w] })));
+    const hol = P.holidayName(ex, iso);
+    const note = (ex.days[iso] && ex.days[iso].note) || '';
+    const dd = P.diffDays(iso, ex.start);
+    return el('div', { class: 'wk-day', dataset: Object.assign({ w: String(w) }, w === 0 || w === 6 ? { we: '' } : {}, hol ? { hol: '' } : {}, iso === today ? { today: '' } : {}, examIdx[iso] ? { exam: '' } : {}) },
+      el('div', { class: 'wk-dh' }, el('span', { class: 'n', text: String(+iso.slice(8)) }), el('span', { class: 'w', text: WD[w] }), hol ? el('small', { text: hol }) : null,
+        el('span', { class: 'd', text: dd > 0 ? 'D-' + dd : dd === 0 ? 'D-DAY' : '' })),
+      examIdx[iso] ? el('div', { class: 'wk-exam' }, el('b', { text: S.examDayN(examIdx[iso]) }), el('span', { text: namesOf(iso) })) : null,
+      note ? el('div', { class: 'wk-memo' }, ico('sticky-note'), el('span', { text: note })) : null,
+      el('ul', { class: 'wk-t' }, listOf(iso).map((t) => el('li', null,
+        el('button', { type: 'button', class: 'wk-row', role: 'checkbox', 'aria-checked': String(t.done), style: '--c:' + colorOf(t), dataset: Object.assign({ kind: P.taskKind(ex, t) }, t.done ? { done: '' } : {}), onClick: toggle(t) },
+          el('i', { class: 'bx' }, t.done ? ico('check') : null), el('b', { text: P.taskLabel(state, ex, t) }), el('small', { text: P.taskKind(ex, t) }))))),
+      el('div', { class: 'wk-lines' }));
+  };
+  const total = Math.ceil(all.length / (7 * perPage));
+  const pages = [];
+  for (let i = 0; i < total; i++) {
+    const chunk = all.slice(i * 7 * perPage, (i + 1) * 7 * perPage);
+    const cnt = {};
+    let sum = 0;
+    chunk.forEach((iso) => (map[iso] || []).forEach((t) => { const es = ex.subs.find((x) => x.id === t.esId); if (!es) return; cnt[es.id] = (cnt[es.id] || 0) + 1; sum++; }));
+    const pills = ex.subs.filter((es) => cnt[es.id]).map((es) => { const sj = P.subjectOf(state, es); return el('span', { style: '--c:' + sj.color }, el('i'), sj.name, el('b', { text: String(cnt[es.id]) })); });
+    const rows = el('div', { class: 'wk-grid w' + perPage }, chunk.map(dayOf),
+      el('div', { class: 'wk-day note' }, el('div', { class: 'wk-dh' }, el('span', { class: 'w', text: S.memo })), el('div', { class: 'wk-lines' })));
+    pages.push(el('div', { class: 'pg wk' },
+      el('div', { class: 'wk-head' },
+        el('div', null, el('div', { class: 'ex', text: ex.name }), el('h3', { text: kdate(chunk[0]) + ' – ' + kdate(chunk[chunk.length - 1]) })),
+        el('div', { class: 'wk-sum' }, sum ? el('span', { class: 'tot', text: S.weekTotal(sum) }) : null, pills),
+        el('div', { class: 'pgn', text: (i + 1) + ' / ' + total })),
+      rows));
+  }
+  return el('div', { class: 'pgs' }, pages);
+}
+function buildPrintHtml(ex, g) {
+  return '<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + escHtml(ex.name) + '</title><style>' + PRINT_CSS + 'body{margin:0;background:#fff}</style></head><body>' + g.outerHTML + '</body></html>';
+}
+function printTab(ex) {
+  const mode = ui.printMode || 0;
+  const g = printGrid(ex, mode);
+  const inViewer = !!(window.claude && typeof window.claude.use === 'function');
+  const modes = [[0, S.printModeAll], [2, S.printModeTwo], [1, S.printModeOne]];
+  return el('div', { class: 'stack' },
+    el('div', { class: 'toolbar noprint' },
+      el('div', { class: 'seg', role: 'group', 'aria-label': S.printModeLabel }, modes.map(([v, l]) => el('button', { type: 'button', 'aria-pressed': String(mode === v), onClick: () => { ui.printMode = v; renderAll(); }, text: l }))),
+      el('span', { class: 'spacer' }),
+      inViewer ? null : el('button', { type: 'button', class: 'btn primary', onClick: () => { try { window.print(); } catch (e) { /* 인쇄를 쓸 수 없으면 HTML 저장을 쓴다 */ } } }, ico('printer'), S.printBtn),
+      el('button', { type: 'button', class: inViewer ? 'btn primary' : 'btn', onClick: async () => {
+        const r = await saveFile(ex.name.replace(/[\\/:*?"<>|]/g, '') + ' ' + modes.find((m) => m[0] === mode)[1] + '.html', buildPrintHtml(ex, g), 'text/html');
+        if (r === true) toast(S.printSaved); else if (r === false) toast(S.printFail);
+      } }, ico('download'), S.printSave)),
+    el('div', { class: 'pg-wrap' }, g));
+}
+
+/* ---------- 설정 서랍 ---------- */
+function openSettings(opener) {
+  openPanel('settings', S.settings, () => {
+    const lim = el('div', { class: 'field-group' }, el('div', { class: 't', text: S.limitsTitle }),
+      el('div', { class: 'grid4', style: 'grid-template-columns:repeat(auto-fit,minmax(88px,1fr))' }, P.LEVELS.map((l) => el('label', { class: 'f' }, el('span', { text: l.label }),
+        el('input', { type: 'number', min: '0', max: '20', inputmode: 'numeric', value: state.limits[l.key], 'data-autofocus': l.key === 'calm' ? '' : null, onChange: (e) => { state.limits[l.key] = Math.min(20, Math.max(0, Math.round(Number(e.target.value)) || 0)); commit({}); } })))));
+    const rc = el('label', { class: 'f' }, el('span', { text: S.recapDefault }),
+      el('input', { type: 'number', min: '1', max: '30', inputmode: 'numeric', value: state.recapDays, onChange: (e) => { state.recapDays = Math.min(30, Math.max(1, Math.round(Number(e.target.value)) || 7)); commit({}); } }));
+    const th = el('div', { class: 'field-group' }, el('div', { class: 't', text: S.themeTitle }),
+      el('div', { class: 'seg', role: 'group' }, ['auto', 'light', 'dark'].map((k) => el('button', { type: 'button', text: S.themes[k], 'aria-pressed': String(ui.theme === k), onClick: () => { ui.theme = k; savePrefs(); applyTheme(); refreshPanel(); } }))));
+    const ex = cur();
+    const wk = ex ? ex.week || (ex.week = {}) : state.week;
+    const week = el('div', { class: 'field-group' }, el('div', { class: 't', text: S.weekTitle }),
+      el('div', { class: 'grid4', style: 'grid-template-columns:repeat(auto-fit,minmax(96px,1fr))' }, [1, 2, 3, 4, 5, 6, 0].map((w) => el('label', { class: 'f' }, el('span', { text: WD[w] }),
+        el('select', { onChange: (e) => { if (e.target.value) wk[w] = e.target.value; else delete wk[w]; state.week = P.cleanWeek(wk); commit({}); } },
+          el('option', { value: '', text: S.weekAuto, selected: !wk[w] }), P.LEVELS.map((l) => el('option', { value: l.key, text: l.label, selected: wk[w] === l.key })))))));
+    const dp = el('div', { class: 'field-group' }, el('div', { class: 't', text: S.defPlanTitle }),
+      el('div', { class: 'plan' }, [['n', S.planN], ['m', S.planM], ['r', S.planR]].map(([k, label]) => el('label', null, label,
+        el('input', { type: 'number', min: '0', max: String(P.MAX_COUNT), inputmode: 'numeric', value: state.defPlan[k], 'aria-label': label, onChange: (e) => { state.defPlan = P.cleanPlan(Object.assign({}, state.defPlan, { [k]: Math.round(Number(e.target.value)) || 0 })); commit({ render: false }); } })))));
+    return [week, lim, dp, rc, th];
+  }, opener);
+}
+
+/* ---------- 데이터 서랍: 내보내기와 가져오기 ---------- */
+async function saveFile(name, text, mime) {
+  if (window.claude && typeof window.claude.use === 'function') {
+    try {
+      const dl = await window.claude.use('downloads');
+      if (dl) { await dl.save({ filename: name, data: text }); return true; }
+    } catch (e) { if (e && e.code === 'declined') return null; /* 그 외에는 직접 저장으로 */ }
+  }
+  try {
+    const url = URL.createObjectURL(new Blob([text], { type: mime || 'application/json' }));
+    const a = document.createElement('a');
+    a.href = url; a.download = name; document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    return true;
+  } catch (e) { return false; }
+}
+function copyText(text) {
+  const legacy = () => {
+    const ta = el('textarea', { style: 'position:fixed;left:-999px;top:0', 'aria-hidden': 'true', tabindex: '-1' });
+    ta.value = text; document.body.append(ta); ta.select();
+    let ok = false; try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    ta.remove(); return ok;
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text).then(() => true, () => legacy());
+  return Promise.resolve(legacy());
+}
+function importText(text) {
+  let data;
+  try { data = JSON.parse(text); } catch (e) { ui.importMsg = S.importBad; refreshPanel(); return; }
+  const r = P.importMerge(state, data);
+  if (r.error) { ui.importMsg = S.importBad; refreshPanel(); return; }
+  ui.importMsg = S.importRes(r.added, r.dup, r.skipped);
+  ui.importRaw = '';
+  commit({ panel: true });
+}
+const hasFiles = (e) => !!e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files');
+function matchesJson(f) {
+  const n = f.name.toLowerCase(), t = (f.type || '').toLowerCase();
+  return n.endsWith('.json') || t === 'application/json' || t === 'text/plain' || (!t && !/\.[^./\\]+$/.test(n));
+}
+function readText(f) {
+  if (typeof f.text === 'function') return f.text();
+  return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result)); r.onerror = () => rej(r.error); r.readAsText(f); });
+}
+async function importFiles(files) {
+  const list = Array.from(files);
+  if (!list.length) return;
+  const f = list.find(matchesJson) || list[0];
+  if (!f) return;
+  let note = '';
+  if (list.length > 1) note = S.importMulti;
+  try {
+    if (f.size > 20 * 1024 * 1024) throw new Error('size');
+    const text = await readText(f);
+    importText(text);
+    if (note) { ui.importMsg += ' ' + note; refreshPanel(); }
+  } catch (e) { ui.importMsg = S.importBad; refreshPanel(); }
+}
+function openData(opener) {
+  openPanel('data', S.data, () => {
+    const json = () => JSON.stringify(P.exportPayload(state), null, 1);
+    const ta = el('textarea', { rows: '4', placeholder: S.importPaste, spellcheck: 'false', autocapitalize: 'off', autocomplete: 'off', 'aria-label': S.import, onInput: (e) => { ui.importRaw = e.target.value; } });
+    ta.value = ui.importRaw;
+    const area = el('div', { class: 'drop-area' }, ta);
+    let depth = 0;
+    area.addEventListener('dragenter', (e) => { if (!hasFiles(e)) return; e.preventDefault(); e.stopPropagation(); depth++; area.dataset.dragover = ''; });
+    area.addEventListener('dragover', (e) => { if (!hasFiles(e)) return; e.preventDefault(); e.stopPropagation(); e.dataTransfer.dropEffect = 'copy'; });
+    area.addEventListener('dragleave', (e) => { if (!hasFiles(e)) return; depth = Math.max(0, depth - 1); if (!depth) delete area.dataset.dragover; });
+    area.addEventListener('drop', (e) => { if (!hasFiles(e)) return; e.preventDefault(); e.stopPropagation(); depth = 0; delete area.dataset.dragover; importFiles(Array.from(e.dataTransfer.files)); });
+    const fileIn = el('input', { type: 'file', accept: '.json,application/json', hidden: true, onChange: (e) => { importFiles(Array.from(e.target.files)); e.target.value = ''; } });
+    return [
+      el('div', { class: 'field-group' }, el('div', { class: 't', text: S.export }),
+        el('div', { class: 'row' },
+          el('button', { type: 'button', class: 'btn primary', 'data-autofocus': '', text: S.exportFile, onClick: async () => { const r = await saveFile('exam-planner.json', json()); if (r === true) toast(S.exported); else if (r === false) toast(S.exportFail); } }),
+          el('button', { type: 'button', class: 'btn', text: S.exportCopy, onClick: async () => { toast((await copyText(json())) ? S.copied : S.copyFail); } }))),
+      el('div', { class: 'field-group' }, el('div', { class: 't', text: S.import }), area, fileIn,
+        el('div', { class: 'row' },
+          el('button', { type: 'button', class: 'btn', text: S.importFile, onClick: () => fileIn.click() }),
+          el('button', { type: 'button', class: 'btn primary', text: S.importRun, onClick: () => { if (ta.value.trim()) importText(ta.value); } })),
+        ui.importMsg ? el('p', { class: ui.importMsg === S.importBad ? 'err' : 'muted', role: 'status', text: ui.importMsg }) : null),
+    ];
+  }, opener);
+}
+
+/* ---------- 시작 ---------- */
+function bindGlobal() {
+  $('#panelClose').addEventListener('click', () => closePanel());
+  $('#scrim').addEventListener('click', () => closePanel());
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (pop.el) { e.preventDefault(); closePopover(true); return; }
+    if (!$('#panel').hidden) { e.preventDefault(); closePanel(); }
+  });
+  document.addEventListener('pointerdown', (e) => {
+    if (pop.el && !pop.el.contains(e.target) && !(pop.anchor && pop.anchor.contains(e.target))) closePopover();
+  });
+  for (const type of ['dragover', 'drop']) {
+    window.addEventListener(type, (e) => { if (!hasFiles(e)) return; e.preventDefault(); if (type === 'dragover') e.dataTransfer.dropEffect = 'none'; });
+  }
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { flushLocal(); if (remote.timer) { clearTimeout(remote.timer); pushRemote(); } } });
+  window.addEventListener('pagehide', () => { flushLocal(); });
+}
+async function start() {
+  loadPrefs(); applyTheme(); bindGlobal();
+  document.head.append(el('style', { id: 'printcss', text: PRINT_CSS }));
+  const raw = await loadLocal();
+  const clean = raw && P.sanitizeState(raw);
+  if (clean) state = clean;
+  const ex0 = cur();
+  if (ui.tab === null) ui.tab = 'board';
+  const t0 = P.todayISO();
+  const inPrep = !!ex0 && t0 >= ex0.prepStart && t0 <= ex0.end;
+  if (isNarrow()) ui.tab = 'today';
+  else if (inPrep) ui.tab = 'print';
+  if (ex0 && !ex0.subs.length) ui.tab = 'exam';
+  ui.scrollToday = true;
+  renderAll();
+  initRemote();
+}
+start();
+
+</script>
+</body>
+</html>

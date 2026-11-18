@@ -1,0 +1,35 @@
+# exam-planner 전용 Worker 설정 견본.
+# 이 파일을 wrangler.toml 로 복사해 자리표시 값을 채운다: cp wrangler.toml.example wrangler.toml
+# wrangler.toml 은 .gitignore(server/wrangler.toml)로 저장소에서 제외된다. 실제 값을 넣어도 올라가지 않는다.
+
+# Worker 이름. 배포 주소(https://exam-plan-sync.하위도메인.workers.dev)에 들어간다
+name = "exam-plan-sync"
+main = "src/index.ts"
+compatibility_date = "2026-11-01"
+
+[[d1_databases]]
+binding = "DB"                                # 코드가 쓰는 이름이므로 바꾸지 않는다
+database_name = "<db-name>"                   # npx wrangler d1 create 에 쓴 이름과 같게 채운다(권장: exam-plan-db)
+database_id = "<wrangler d1 create 출력값>"   # d1 create 가 출력한 database_id 를 붙인다
+
+# INVITE_CODE 는 vars 가 아니라 secret 이다. 이 파일에 쓰지 않는다.
+# 설정: npx wrangler secret put INVITE_CODE
+[vars]
+# 새 공간을 만들 수 있는 앱 식별자. 이 Worker 는 exam-planner 앱 하나만 받는다.
+# 앱이 보내는 X-App-Id 와 정확히 같아야 한다(소문자·숫자·하이픈 32자 이내).
+ALLOWED_APPS = "exam-planner"
+# 항목 하나(암호화된 base64 문자 수)의 상한. 256 KB. sync-kit 클라이언트가 같은 기본값을 전제하므로 바꾸지 않는다.
+MAX_ITEM_BYTES = "262144"
+# 공간 하나의 전체 저장 상한. 5 MB(기본값). OPERATIONS 실측(항목 평균 13 KB, 공간 사용량 6%)에 비해 넉넉하다.
+MAX_SPACE_BYTES = "5242880"
+# 서버 전체의 공간 수 상한. 개인용이라 5개로 줄였다.
+# 주의: 공간은 서버 API 로 지울 수 없다. 키를 새로 만들어 시험할 때마다 공간 1개를 영구히 차지한다.
+MAX_SPACES = "5"
+# 공간 하나의 삭제되지 않은 항목 수 상한. 1000개(기본값). 개인용 항목 수로 넉넉하다.
+MAX_ITEMS_PER_SPACE = "1000"
+# 공간 하나의 하루(UTC) 쓰기 상한. 기본 300 에서 3000 으로 올렸다.
+# 이유: 기본 300 은 항목이 300개를 넘는 초기 업로드나 여러 기기 편집에서 닿을 수 있다. 3000 이어도 최악의 경우
+# (공간 5개 × 3000 쓰기 × 약 2.3 D1 행/쓰기, OPERATIONS 실측 1회 기준) 가 하루 약 34,500 행이라 무료 쓰기 한도 10만 행 안에 든다.
+MAX_DAILY_WRITES = "3000"
+# 삭제 기록(tombstone)을 보관하는 일수. 30일(기본값). 이 기간 동안 쉬던 기기는 삭제 내역을 받고, 넘기면 resync 를 받는다.
+TOMBSTONE_DAYS = "30"
