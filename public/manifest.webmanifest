@@ -1,0 +1,16 @@
+{
+  "name": "시험 공부 플래너",
+  "short_name": "공부 플래너",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#faf9f5",
+  "theme_color": "#d97757",
+  "icons": [
+    { "src": "icons/pwa/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/pwa/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/pwa/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/pwa/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

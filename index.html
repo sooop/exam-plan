@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>시험 공부 플래너</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22512%22 height=%22512%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%23d97757%22/%3E%3Cg transform=%22translate(13 13) scale(3.0833)%22 fill=%22none%22 stroke=%22%23ffffff%22 stroke-width=%222.75%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M8 2v3%22/%3E%3Cpath d=%22M16 2v3%22/%3E%3Crect x=%223%22 y=%223%22 width=%2218%22 height=%2218%22 rx=%222%22/%3E%3Cpath d=%22M3 9h18%22/%3E%3Cpath d=%22m9 15 2 2 4-4%22/%3E%3C/g%3E%3C/svg%3E" />
+    <!-- 아이콘·manifest 링크는 vite.config.ts 의 appIcons 플러그인이 빌드 모드별로 넣는다 -->
     <script>
       // 첫 화면이 그려지기 전에 테마를 정한다(밝은 화면이 번쩍이지 않도록)
       try { var p = JSON.parse(localStorage.getItem('examPlanner.ui') || '{}'); if (p.theme === 'light' || p.theme === 'dark') document.documentElement.dataset.theme = p.theme; } catch (e) {}
